@@ -700,14 +700,22 @@ export async function getIncomeData(
   const to = options?.to ?? toIsoDate(endOfMonth(new Date()));
   const consultoraId = options?.consultoraId;
   const consultoraFilterLabel = consultoraId ? "Consultora seleccionada" : "Todas las consultoras";
-  const fallbackIncomeData: IncomeData = {
+  const emptyIncomeData: IncomeData = {
     ...incomeData,
     period: formatDateRange(from, to),
     entity: consultoraFilterLabel,
     status: consultoraId ? "Vista filtrada" : "Todas las consultoras",
+    estimatedIncome: formatCurrency(0),
+    billedIncome: formatCurrency(0),
+    billedRatio: "0 clases",
+    pendingApproval: "00",
+    pendingRatio: "Limpio",
+    ledgerRows: [],
+    subtotal: formatCurrency(0),
+    recordsFound: "0 registros facturables",
   };
 
-  return withFallback("income", fallbackIncomeData, async () => {
+  try {
     const incomePeriod = await getIngresosPeriodo(from, to, {
       consultoraId,
     });
@@ -751,7 +759,17 @@ export async function getIncomeData(
           ? "Los totales de ingresos se filtran por la consultora seleccionada. Las filas marcadas como Sin clasificar quedan fuera del total facturable."
           : "Los totales de ingresos excluyen las filas marcadas como Sin clasificar para mantener limpia la vista facturable.",
     };
-  });
+  } catch (error) {
+    const message =
+      error instanceof BackendConfigError
+        ? "BACKEND_BASE_URL no está configurado."
+        : getApiErrorMessage(error) ?? "No se pudieron cargar los ingresos.";
+
+    return {
+      ...emptyIncomeData,
+      backendNotice: `No se pudieron cargar los ingresos: ${message}`,
+    };
+  }
 }
 
 export async function getReportsData(date = new Date()): Promise<ReportsData> {

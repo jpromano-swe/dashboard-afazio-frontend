@@ -289,32 +289,45 @@ export default async function IncomePage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/15">
-                {view.ledgerRows.map((row) => (
-                  <tr key={`${row.date}-${row.title}`} className="hover:bg-surface-container-low/60">
-                    <td className="px-6 py-5 font-headline text-lg text-primary">
-                      {row.date}
-                    </td>
-                    <td className="px-6 py-5">
-                      <p className="font-semibold text-primary">{row.title}</p>
-                      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-                        {row.code}
-                      </p>
-                    </td>
-                    <td className="px-6 py-5 text-sm text-on-surface-variant">{row.entity}</td>
-                    <td className="px-6 py-5 text-sm text-on-surface-variant">
-                      {row.consultant}
-                    </td>
-                    <td className="px-6 py-5 text-sm text-on-surface-variant">{row.hours}</td>
-                    <td className="px-6 py-5">
-                      <StatusBadge tone={getIncomeStatusTone(row.status)}>
-                        {getIncomeStatusLabel(row.status)}
-                      </StatusBadge>
-                    </td>
-                    <td className="px-6 py-5 text-right font-headline text-2xl font-bold text-primary">
-                      {row.amount}
+                {view.ledgerRows.length > 0 ? (
+                  view.ledgerRows.map((row) => (
+                    <tr key={`${row.date}-${row.title}`} className="hover:bg-surface-container-low/60">
+                      <td className="px-6 py-5 font-headline text-lg text-primary">
+                        {row.date}
+                      </td>
+                      <td className="px-6 py-5">
+                        <p className="font-semibold text-primary">{row.title}</p>
+                        <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
+                          {row.code}
+                        </p>
+                      </td>
+                      <td className="px-6 py-5 text-sm text-on-surface-variant">{row.entity}</td>
+                      <td className="px-6 py-5 text-sm text-on-surface-variant">
+                        {row.consultant}
+                      </td>
+                      <td className="px-6 py-5 text-sm text-on-surface-variant">{row.hours}</td>
+                      <td className="px-6 py-5">
+                        <StatusBadge tone={getIncomeStatusTone(row.status)}>
+                          {getIncomeStatusLabel(row.status)}
+                        </StatusBadge>
+                      </td>
+                      <td className="px-6 py-5 text-right font-headline text-2xl font-bold text-primary">
+                        {row.amount}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-10 text-sm leading-6 text-on-surface-variant"
+                    >
+                      {view.backendNotice
+                        ? "No se pudieron mostrar ingresos para este rango. Revisá el aviso superior."
+                        : "No hay clases facturables para este rango todavía."}
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
