@@ -42,23 +42,40 @@ function pad(value: number) {
 }
 
 function toIsoDate(date: Date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
+function toTimeZoneCalendarDate(dateInput: string | Date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DEFAULT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(dateInput));
+
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  const day = Number(parts.find((part) => part.type === "day")?.value);
+
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 }
 
 function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 12, 0, 0));
 }
 
 function endOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12, 0, 0),
+  );
 }
 
 function startOfWeek(date: Date) {
   const current = new Date(date);
-  const dayIndex = (current.getDay() + 6) % 7;
+  const dayIndex = (current.getUTCDay() + 6) % 7;
 
-  current.setDate(current.getDate() - dayIndex);
-  current.setHours(0, 0, 0, 0);
+  current.setUTCDate(current.getUTCDate() - dayIndex);
+  current.setUTCHours(12, 0, 0, 0);
 
   return current;
 }
@@ -452,11 +469,12 @@ async function withFallback<T>(label: string, fallback: T, loader: () => Promise
 
 export async function getDashboardData(date = new Date()): Promise<DashboardData> {
   return withFallback("dashboard", dashboardData, async () => {
-    const monthStart = toIsoDate(startOfMonth(date));
-    const monthEnd = toIsoDate(endOfMonth(date));
-    const weekStartDate = startOfWeek(date);
+    const baseDate = toTimeZoneCalendarDate(date);
+    const monthStart = toIsoDate(startOfMonth(baseDate));
+    const monthEnd = toIsoDate(endOfMonth(baseDate));
+    const weekStartDate = startOfWeek(baseDate);
     const weekStart = toIsoDate(weekStartDate);
-    const todayIso = toIsoDate(date);
+    const todayIso = toIsoDate(baseDate);
 
     const [
       rawTodayClasses,
@@ -519,7 +537,7 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
         },
       ],
       schedule: todayClasses.map(mapClaseToScheduleEntry),
-      weeklySchedule: buildWeeklySchedule(weeklyClasses, date),
+      weeklySchedule: buildWeeklySchedule(weeklyClasses, baseDate),
       backendNotice: incomeErrorMessage
         ? `Los ingresos del dashboard no están disponibles ahora: ${incomeErrorMessage}`
         : undefined,
@@ -591,6 +609,7 @@ export async function getInboxData(): Promise<InboxData> {
 
 export async function getRatesData(date = new Date()): Promise<RatesData> {
   return withFallback("rates", ratesData, async () => {
+    const baseDate = toTimeZoneCalendarDate(date);
     const liveConsultoras = (await getConsultoras().catch(() => [])).filter(isRealConsultora);
     const consultoraSeeds = getConsultoraSeeds();
     const consultoraSources =
@@ -611,7 +630,7 @@ export async function getRatesData(date = new Date()): Promise<RatesData> {
       };
     }
 
-    const todayIso = toIsoDate(date);
+    const todayIso = toIsoDate(baseDate);
     const settled = await Promise.all(
       consultoraSources.map(async (seed) => {
         const history = await getTarifasConsultora(seed.id);
@@ -696,8 +715,9 @@ export async function getIncomeData(
     consultoraId?: number;
   },
 ): Promise<IncomeData> {
-  const from = options?.from ?? toIsoDate(startOfMonth(new Date()));
-  const to = options?.to ?? toIsoDate(endOfMonth(new Date()));
+  const baseDate = toTimeZoneCalendarDate();
+  const from = options?.from ?? toIsoDate(startOfMonth(baseDate));
+  const to = options?.to ?? toIsoDate(endOfMonth(baseDate));
   const consultoraId = options?.consultoraId;
   const consultoraFilterLabel = consultoraId ? "Consultora seleccionada" : "Todas las consultoras";
   const emptyIncomeData: IncomeData = {
@@ -774,11 +794,12 @@ export async function getIncomeData(
 
 export async function getReportsData(date = new Date()): Promise<ReportsData> {
   return withFallback("reports", reportsData, async () => {
-    const fromDate = startOfMonth(date);
-    const toDate = endOfMonth(date);
+    const baseDate = toTimeZoneCalendarDate(date);
+    const fromDate = startOfMonth(baseDate);
+    const toDate = endOfMonth(baseDate);
     const from = toIsoDate(fromDate);
     const to = toIsoDate(toDate);
-    const periodKey = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+    const periodKey = `${baseDate.getUTCFullYear()}-${pad(baseDate.getUTCMonth() + 1)}`;
     const [incomePeriod, consultoras] = await Promise.all([
       getIngresosPeriodo(from, to),
       getConsultoras().catch(() => []),
