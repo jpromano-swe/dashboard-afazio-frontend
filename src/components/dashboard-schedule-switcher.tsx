@@ -116,36 +116,29 @@ export function DashboardScheduleSwitcher({
   return (
     <SectionFrame className="mt-10 p-1">
       <div className="flex flex-col gap-6 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-        <div className="min-h-[118px]">
+        <div className="min-h-[176px] sm:min-h-[136px]">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
             {view === "today" ? "Vista de hoy" : weekRangeLabel}
           </p>
-          <div className="relative mt-2 min-h-[76px]">
+          <div className="mt-3 flex min-h-[104px] items-end sm:min-h-[84px]">
             <div
-              className={`absolute inset-0 flex items-center gap-3 transition-all duration-300 ease-out ${getSlideClass(
-                view === "today",
-                "left",
-              )}`}
+              className={`flex flex-wrap items-center gap-3 transition-all duration-300 ease-out ${
+                view === "today"
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-3 opacity-100"
+              }`}
             >
-              <h2 className="max-w-[12ch] font-headline text-[2.55rem] font-bold leading-[0.94] text-primary sm:max-w-none sm:text-5xl">
-                Agenda de hoy
+              <h2 className="max-w-[12ch] font-headline text-[2.45rem] font-bold leading-[0.96] text-primary sm:max-w-none sm:text-[3.2rem]">
+                {view === "today" ? "Agenda de hoy" : "Clases de esta semana"}
               </h2>
-            </div>
-            <div
-              className={`absolute inset-0 flex items-center gap-3 transition-all duration-300 ease-out ${getSlideClass(
-                view === "weekly",
-                "right",
-              )}`}
-            >
-              <h2 className="max-w-[12ch] font-headline text-[2.35rem] font-bold leading-[0.94] text-primary sm:max-w-none sm:text-5xl">
-                Clases de esta semana
-              </h2>
-              <StatusBadge tone="confirmed" className="shrink-0">
-                {String(weeklyClassCount).padStart(2, "0")}
-              </StatusBadge>
+              {view === "weekly" ? (
+                <StatusBadge tone="confirmed" className="shrink-0 self-center">
+                  {String(weeklyClassCount).padStart(2, "0")}
+                </StatusBadge>
+              ) : null}
             </div>
           </div>
-          <p className="mt-2 text-sm text-on-surface-variant">
+          <p className="mt-3 text-sm text-on-surface-variant">
             {view === "today"
               ? "Vista tipo libro de papel de los bloques de clase de hoy."
               : "Clases agrupadas por día durante la semana actual."}
