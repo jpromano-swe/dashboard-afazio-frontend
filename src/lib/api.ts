@@ -2,6 +2,7 @@ import {
   type ApiErrorResponse,
   BackendConfigError,
   getClasesHoy,
+  getClasesPorPeriodo,
   getClasesSemana,
   getClasesPendientesClasificacion,
   getConsultoras,
@@ -167,6 +168,83 @@ function normalizeConsultoraName(name: string | null | undefined) {
   return name?.trim() || "Sin clasificar";
 }
 
+function normalizeTitleKey(title: string | null | undefined) {
+  return (title ?? "").trim().toLowerCase();
+}
+
+function buildAssignmentLabel(
+  clase: Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">,
+) {
+  const courseParts = [clase.empresa, clase.grupo]
+    .map((part) => (part ?? "").trim())
+    .filter(Boolean);
+
+  if (courseParts.length > 0) {
+    return courseParts.join(" · ");
+  }
+
+  return normalizeConsultoraName(clase.consultoraNombre);
+}
+
+function buildClassAssignmentLookup(classes: ClaseDelDiaResponse[]) {
+  const lookup = new Map<
+    string,
+    Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">
+  >();
+
+  classes.forEach((clase) => {
+    const key = normalizeTitleKey(clase.titulo);
+    const hasAssignment =
+      !isUnclassifiedConsultoraName(clase.consultoraNombre) ||
+      Boolean(clase.empresa) ||
+      Boolean(clase.grupo);
+
+    if (!key || !hasAssignment || lookup.has(key)) {
+      return;
+    }
+
+    lookup.set(key, {
+      consultoraNombre: clase.consultoraNombre,
+      empresa: clase.empresa ?? null,
+      grupo: clase.grupo ?? null,
+    });
+  });
+
+  return lookup;
+}
+
+function applyAssignmentFallback(
+  classes: ClaseDelDiaResponse[],
+  assignmentLookup: Map<
+    string,
+    Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">
+  >,
+) {
+  return classes.map((clase) => {
+    const alreadyAssigned =
+      !isUnclassifiedConsultoraName(clase.consultoraNombre) ||
+      Boolean(clase.empresa) ||
+      Boolean(clase.grupo);
+
+    if (alreadyAssigned) {
+      return clase;
+    }
+
+    const fallbackAssignment = assignmentLookup.get(normalizeTitleKey(clase.titulo));
+
+    if (!fallbackAssignment) {
+      return clase;
+    }
+
+    return {
+      ...clase,
+      consultoraNombre: fallbackAssignment.consultoraNombre,
+      empresa: fallbackAssignment.empresa ?? null,
+      grupo: fallbackAssignment.grupo ?? null,
+    };
+  });
+}
+
 function getScheduleStatus(clase: ClaseDelDiaResponse) {
   if (clase.estado === "DICTADA") {
     return { status: "billable" as const, action: "Dictada", muted: true };
@@ -185,7 +263,7 @@ function getScheduleStatus(clase: ClaseDelDiaResponse) {
 
 function mapClaseToScheduleEntry(clase: ClaseDelDiaResponse) {
   const mappedStatus = getScheduleStatus(clase);
-  const consultoraLabel = normalizeConsultoraName(clase.consultoraNombre);
+  const assignmentLabel = buildAssignmentLabel(clase);
 
   return {
     id: clase.id,
@@ -194,8 +272,8 @@ function mapClaseToScheduleEntry(clase: ClaseDelDiaResponse) {
     classState: clase.estado,
     title: clase.titulo,
     subtitle: clase.meetingUrl
-      ? [consultoraLabel, "Reunión lista"].filter(Boolean).join(" · ")
-      : consultoraLabel,
+      ? [assignmentLabel, "Reunión lista"].filter(Boolean).join(" · ")
+      : assignmentLabel,
     time: formatTime(clase.fechaInicio),
     duration: `${clase.duracionMinutos} min`,
     status: mappedStatus.status,
@@ -373,16 +451,27 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
     const weekStart = toIsoDate(weekStartDate);
     const todayIso = toIsoDate(date);
 
-    const [rawTodayClasses, rawWeeklyClasses, rawPendingClasses, incomeResult] = await Promise.all([
+    const [
+      rawTodayClasses,
+      rawWeeklyClasses,
+      rawPendingClasses,
+      classifiedMonthClasses,
+      incomeResult,
+    ] = await Promise.all([
       getClasesHoy(todayIso),
       getClasesSemana(weekStart),
       getClasesPendientesClasificacion(),
+      getClasesPorPeriodo(monthStart, monthEnd, { soloClasificadas: true }).catch(() => []),
       getIngresosPeriodo(monthStart, monthEnd)
         .then((value) => ({ value, error: null }))
         .catch((error) => ({ value: null, error })),
     ]);
-    const todayClasses = rawTodayClasses.filter((clase) =>
+    const assignmentLookup = buildClassAssignmentLookup(classifiedMonthClasses);
+    const todayClasses = applyAssignmentFallback(rawTodayClasses, assignmentLookup).filter((clase) =>
       shouldIncludeClassTitle(clase.titulo),
+    );
+    const weeklyClasses = applyAssignmentFallback(rawWeeklyClasses, assignmentLookup).filter(
+      (clase) => shouldIncludeClassTitle(clase.titulo),
     );
     const pendingClasses = rawPendingClasses.filter((session) =>
       shouldIncludeClassTitle(session.titulo),
@@ -423,7 +512,7 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
         },
       ],
       schedule: todayClasses.map(mapClaseToScheduleEntry),
-      weeklySchedule: buildWeeklySchedule(rawWeeklyClasses, date),
+      weeklySchedule: buildWeeklySchedule(weeklyClasses, date),
       backendNotice: incomeErrorMessage
         ? `Los ingresos del dashboard no están disponibles ahora: ${incomeErrorMessage}`
         : undefined,
