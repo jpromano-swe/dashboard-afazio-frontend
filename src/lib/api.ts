@@ -11,6 +11,7 @@ import {
   getIngresosPeriodo,
   getTarifasConsultora,
   getTarifaVigente,
+  isPendingClassification,
   isRealConsultora,
   isUnclassifiedConsultoraName,
   type ClaseDelDiaResponse,
@@ -173,8 +174,12 @@ function normalizeTitleKey(title: string | null | undefined) {
 }
 
 function buildAssignmentLabel(
-  clase: Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">,
+  clase: Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo" | "sinClasificar">,
 ) {
+  if (isPendingClassification(clase.sinClasificar, clase.consultoraNombre)) {
+    return "Sin clasificar";
+  }
+
   const courseParts = [clase.empresa, clase.grupo]
     .map((part) => (part ?? "").trim())
     .filter(Boolean);
@@ -195,7 +200,7 @@ function buildClassAssignmentLookup(classes: ClaseDelDiaResponse[]) {
   classes.forEach((clase) => {
     const key = normalizeTitleKey(clase.titulo);
     const hasAssignment =
-      !isUnclassifiedConsultoraName(clase.consultoraNombre) ||
+      !isPendingClassification(clase.sinClasificar, clase.consultoraNombre) ||
       Boolean(clase.empresa) ||
       Boolean(clase.grupo);
 
@@ -222,7 +227,7 @@ function applyAssignmentFallback(
 ) {
   return classes.map((clase) => {
     const alreadyAssigned =
-      !isUnclassifiedConsultoraName(clase.consultoraNombre) ||
+      !isPendingClassification(clase.sinClasificar, clase.consultoraNombre) ||
       Boolean(clase.empresa) ||
       Boolean(clase.grupo);
 
@@ -239,6 +244,7 @@ function applyAssignmentFallback(
     return {
       ...clase,
       consultoraNombre: fallbackAssignment.consultoraNombre,
+      sinClasificar: false,
       empresa: fallbackAssignment.empresa ?? null,
       grupo: fallbackAssignment.grupo ?? null,
     };
@@ -312,7 +318,8 @@ function buildInboxConflicts(
   const conflicts: InboxData["conflicts"] = [];
   const missingConsultora = sessions.filter(
     (session) =>
-      !session.consultoraNombre || isUnclassifiedConsultoraName(session.consultoraNombre),
+      !session.consultoraNombre ||
+      isPendingClassification(session.sinClasificar, session.consultoraNombre),
   ).length;
   const missingGrouping = sessions.filter(
     (session) => !session.empresa && !session.grupo,
@@ -533,7 +540,8 @@ export async function getInboxData(): Promise<InboxData> {
     const totalMinutes = sumBy(sessions, (session) => session.duracionMinutos);
     const missingConsultora = sessions.filter(
       (session) =>
-        !session.consultoraNombre || isUnclassifiedConsultoraName(session.consultoraNombre),
+        !session.consultoraNombre ||
+        isPendingClassification(session.sinClasificar, session.consultoraNombre),
     ).length;
 
     return {
@@ -549,16 +557,19 @@ export async function getInboxData(): Promise<InboxData> {
         title: session.titulo,
         date: formatDateTime(session.fechaInicio),
         duration: `${session.duracionMinutos} min`,
-        client: normalizeConsultoraName(session.consultoraNombre),
+        client: isPendingClassification(session.sinClasificar, session.consultoraNombre)
+          ? "Sin clasificar"
+          : normalizeConsultoraName(session.consultoraNombre),
         company: session.empresa ?? session.grupo ?? "Grupo sin clasificar",
         billable: session.facturable,
+        sinClasificar: session.sinClasificar ?? false,
         consultoraId: findConsultoraIdByName(session.consultoraNombre, realConsultoras),
         consultoraNombre: session.consultoraNombre,
         empresa: session.empresa,
         grupo: session.grupo,
         issue:
           !session.consultoraNombre ||
-          isUnclassifiedConsultoraName(session.consultoraNombre) ||
+          isPendingClassification(session.sinClasificar, session.consultoraNombre) ||
           (!session.empresa && !session.grupo)
             ? "Sin revisar"
             : undefined,
@@ -569,8 +580,8 @@ export async function getInboxData(): Promise<InboxData> {
         missingConsultora > 0
           ? `${missingConsultora} sesión${missingConsultora > 1 ? "es" : ""} importada${
               missingConsultora > 1 ? "s" : ""
-            } todavía carece de asignación de consultora. Elegí una consultora primero y luego vinculá la fila a un curso existente o creá uno en línea.`
-          : "Elegí una consultora y luego asigná un curso existente o creá uno nuevo en línea antes de confirmar.",
+            } todavía carece de asignación de consultora. Elegí una consultora primero y luego vinculá la fila a un curso existente.`
+          : "Elegí una consultora y luego asigná un curso existente antes de confirmar.",
       conflicts: buildInboxConflicts(sessions),
       backendNotice:
         "El valor facturable estimado se omite a propósito mientras la clasificación por curso y la semántica de tarifas se terminan de estabilizar en el backend.",
@@ -701,10 +712,10 @@ export async function getIncomeData(
       consultoraId,
     });
     const pendingEntries = incomePeriod.detalle.filter((entry) =>
-      isUnclassifiedConsultoraName(entry.consultoraNombre),
+      isPendingClassification(entry.sinClasificar, entry.consultoraNombre),
     );
     const billableEntries = incomePeriod.detalle.filter(
-      (entry) => !isUnclassifiedConsultoraName(entry.consultoraNombre),
+      (entry) => !isPendingClassification(entry.sinClasificar, entry.consultoraNombre),
     );
     const billableTotal = sumBy(billableEntries, (entry) => entry.importeCalculado);
 
@@ -720,7 +731,7 @@ export async function getIncomeData(
       pendingRatio:
         pendingEntries.length > 0 ? `${pendingEntries.length} pendientes` : "Limpio",
       ledgerRows: incomePeriod.detalle.map((entry) => {
-        const pending = isUnclassifiedConsultoraName(entry.consultoraNombre);
+        const pending = isPendingClassification(entry.sinClasificar, entry.consultoraNombre);
 
         return {
           date: formatShortDate(entry.fechaClase),

@@ -3,6 +3,7 @@ import {
   getConsultoraSeeds,
   getExcelReportUrl,
   getIngresosPeriodo,
+  isPendingClassification,
   isRealConsultora,
 } from "@/lib/backend";
 
@@ -188,18 +189,19 @@ export async function loadReportWorkspace(
     .map((entry) => {
       const hours = Number(entry.duracionMinutos) / 60;
       const formattedHours = Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+      const pending = isPendingClassification(entry.sinClasificar, entry.consultoraNombre);
 
       return {
         classId: entry.claseId,
         date: formatShortDate(entry.fechaClase),
         title: entry.tituloClase,
-        company: entry.empresa ?? "Sin clasificar",
+        company: pending ? "Sin clasificar" : entry.empresa ?? "Sin clasificar",
         group: entry.grupo ?? "Sin clasificar",
         time: formatTime(entry.fechaClase),
         duration: `${formattedHours} h${formattedHours === "1" ? "" : "s"}`,
-        rate: formatLooseAmount(entry.montoPorHora, entry.moneda),
-        amount: formatLooseAmount(entry.importeCalculado, entry.moneda),
-        status: "Listo" as const,
+        rate: pending ? "—" : formatLooseAmount(entry.montoPorHora, entry.moneda),
+        amount: pending ? "—" : formatLooseAmount(entry.importeCalculado, entry.moneda),
+        status: pending ? ("Tarifa faltante" as const) : ("Listo" as const),
       };
     });
 

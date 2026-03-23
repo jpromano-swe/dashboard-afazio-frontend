@@ -57,6 +57,7 @@ export type ImportedSession = {
   cursoId?: number | null;
   googleEventId?: string | null;
   meetingUrl?: string | null;
+  sinClasificar?: boolean;
   title: string;
   date: string;
   duration: string;

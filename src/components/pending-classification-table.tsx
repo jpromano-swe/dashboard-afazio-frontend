@@ -16,7 +16,7 @@ import {
 } from "@/app/actions";
 import {
   findConsultoraIdByName,
-  isUnclassifiedConsultoraName,
+  isPendingClassification,
   type ConsultoraResponse,
   type CursoResponse,
 } from "@/lib/backend";
@@ -80,7 +80,10 @@ function PendingClassificationRow({
   consultoras: ConsultoraResponse[];
   sameTitleIds: number[];
 }) {
-  const isUnclassified = isUnclassifiedConsultoraName(session.consultoraNombre);
+  const isUnclassified = isPendingClassification(
+    session.sinClasificar,
+    session.consultoraNombre,
+  );
   const initialConsultoraId = useMemo(() => {
     if (session.consultoraId) {
       return String(session.consultoraId);

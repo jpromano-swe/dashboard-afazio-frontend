@@ -11,7 +11,7 @@ import { ScheduleStatusActions } from "@/components/dashboard-class-actions";
 import { StatusBadge } from "@/components/editorial";
 import {
   findConsultoraIdByName,
-  isUnclassifiedConsultoraName,
+  isPendingClassification,
   type ConsultoraResponse,
   type ClaseDelDiaResponse,
   type CursoResponse,
@@ -61,7 +61,10 @@ export function MigrationClassRow({
   const [facturable, setFacturable] = useState(true);
   const router = useRouter();
 
-  const isUnclassified = isUnclassifiedConsultoraName(clase.consultoraNombre);
+  const isUnclassified = isPendingClassification(
+    clase.sinClasificar,
+    clase.consultoraNombre,
+  );
   const initialConsultoraId = useMemo(() => {
     const matchedConsultoraId = findConsultoraIdByName(clase.consultoraNombre, consultoras);
     return matchedConsultoraId ? String(matchedConsultoraId) : "";

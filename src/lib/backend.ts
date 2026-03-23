@@ -33,6 +33,13 @@ export function isUnclassifiedConsultoraName(name: string | null | undefined) {
   return (name ?? "").trim().toLowerCase() === "sin clasificar";
 }
 
+export function isPendingClassification(
+  sinClasificar: boolean | null | undefined,
+  consultoraNombre?: string | null,
+) {
+  return sinClasificar === true || isUnclassifiedConsultoraName(consultoraNombre);
+}
+
 export function isRealConsultora(consultora: ConsultoraResponse) {
   return consultora.activa && !isUnclassifiedConsultoraName(consultora.nombre);
 }
@@ -63,6 +70,7 @@ export interface CrearConsultoraCommand {
 export interface ClaseDelDiaResponse {
   id: number;
   consultoraNombre: string;
+  sinClasificar?: boolean;
   titulo: string;
   descripcion: string | null;
   meetingUrl: string | null;
@@ -85,6 +93,7 @@ export interface ClasePendienteClasificacionResponse {
   titulo: string;
   descripcion: string | null;
   meetingUrl: string | null;
+  sinClasificar?: boolean;
   empresa: string | null;
   grupo: string | null;
   facturable: boolean;
@@ -111,6 +120,7 @@ export interface ActualizarClasificacionMismoTituloResponse {
   processed: number;
   cursoId: number | null;
   consultoraNombre: string | null;
+  sinClasificar?: boolean;
   empresa: string | null;
   grupo: string | null;
   facturable: boolean;
@@ -190,6 +200,7 @@ export interface TarifaConsultoraResponse {
 export interface IngresoPorClaseResponse {
   claseId: number;
   consultoraNombre: string;
+  sinClasificar?: boolean;
   tituloClase: string;
   fechaClase: string;
   duracionMinutos: number;
@@ -202,6 +213,7 @@ export interface IngresoDetalleResponse {
   claseId: number;
   cursoId: number | null;
   consultoraNombre: string;
+  sinClasificar?: boolean;
   tituloClase: string;
   fechaClase: string;
   duracionMinutos: number;
