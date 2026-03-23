@@ -596,9 +596,9 @@ export async function getInboxData(): Promise<InboxData> {
       estimatedValue: "ARS --",
       classificationTip:
         missingConsultora > 0
-          ? `${missingConsultora} sesión${missingConsultora > 1 ? "es" : ""} importada${
+          ? `Por ${missingConsultora} sesión${missingConsultora > 1 ? "es" : ""} importada${
               missingConsultora > 1 ? "s" : ""
-            } todavía carece de asignación de consultora. Elegí una consultora primero y luego vinculá la fila a un curso existente.`
+            } todavía ${missingConsultora > 1 ? "carecen" : "carece"} asignación de consultora. Elegí una consultora primero y luego vinculá la fila a un curso existente.`
           : "Elegí una consultora y luego asigná un curso existente antes de confirmar.",
       conflicts: buildInboxConflicts(sessions),
       backendNotice:

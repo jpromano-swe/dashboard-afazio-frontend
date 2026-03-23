@@ -38,7 +38,7 @@ export default async function InboxPage() {
             </div>
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4 sm:block sm:border-b-0 sm:rounded-[1.1rem] sm:bg-surface-container-low sm:p-5">
+              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4 sm:block sm:border-b-0 sm:rounded-[1.1rem] sm:bg-surface-container-low sm:px-7 sm:py-6">
                 <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
                   Horas sin clasificar
                 </span>
@@ -46,7 +46,7 @@ export default async function InboxPage() {
                   {data.pendingHours}
                 </span>
               </div>
-              <div className="flex items-center justify-between sm:block sm:rounded-[1.1rem] sm:bg-surface-container-low sm:p-5">
+              <div className="flex items-center justify-between sm:block sm:rounded-[1.1rem] sm:bg-surface-container-low sm:px-7 sm:py-6">
                 <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
                   Valor facturable estimado
                 </span>
