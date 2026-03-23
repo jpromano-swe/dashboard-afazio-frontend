@@ -28,7 +28,7 @@ export default async function InboxPage() {
       actions={<PageActions />}
     >
       <div className="space-y-8">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+        <div className="grid gap-6">
           <SectionFrame className="bg-surface-container-lowest">
             <div className="flex items-center justify-between">
               <h3 className="font-headline text-3xl font-bold text-primary">
@@ -73,19 +73,6 @@ export default async function InboxPage() {
                 {data.backendNotice}
               </p>
             ) : null}
-          </SectionFrame>
-
-          <SectionFrame className="bg-surface-container-lowest">
-            <div className="paper-grid rounded-[1.2rem] border border-dashed border-outline-variant/50 p-5">
-              <div className="space-y-4">
-                <div className="h-5 w-full rounded bg-surface-container-highest" />
-                <div className="h-5 w-5/6 rounded bg-surface-container-highest" />
-                <div className="h-5 w-4/5 rounded bg-[#fde9cf]" />
-              </div>
-              <p className="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
-                Visualizador de agenda
-              </p>
-            </div>
           </SectionFrame>
         </div>
 
