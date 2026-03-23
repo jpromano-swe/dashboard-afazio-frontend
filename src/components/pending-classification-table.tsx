@@ -29,7 +29,7 @@ type PendingClassificationTableProps = {
 };
 
 export const PENDING_CLASSIFICATION_COLUMNS =
-  "minmax(290px, 1.5fr) minmax(170px, 0.95fr) minmax(92px, 0.58fr) minmax(220px, 1fr) minmax(88px, auto) minmax(330px, 1.2fr)";
+  "minmax(220px, 1.05fr) minmax(150px, 0.78fr) minmax(76px, 0.38fr) minmax(170px, 0.76fr) minmax(300px, 1.32fr)";
 
 function getCourseLabel(course: CursoResponse) {
   return course.grupo ? `${course.empresa} - ${course.grupo}` : course.empresa;
@@ -95,7 +95,6 @@ function PendingClassificationRow({
   const [selectedCourseId, setSelectedCourseId] = useState(
     session.cursoId ? String(session.cursoId) : "",
   );
-  const [facturable, setFacturable] = useState(session.billable);
   const router = useRouter();
 
   useEffect(() => {
@@ -224,7 +223,7 @@ function PendingClassificationRow({
 
       formData.set("classId", String(session.id));
       formData.set("consultoraId", consultoraId);
-      formData.set("facturable", String(facturable));
+      formData.set("facturable", mode === "exclude" ? "false" : "true");
 
       if (mode !== "exclude") {
         formData.set("cursoId", selectedCourseId);
@@ -242,7 +241,7 @@ function PendingClassificationRow({
 
                 fallbackFormData.set("classId", String(classId));
                 fallbackFormData.set("cursoId", selectedCourseId);
-                fallbackFormData.set("facturable", String(facturable));
+                fallbackFormData.set("facturable", "true");
 
                 await assignExistingCourseAction(fallbackFormData);
               }),
@@ -283,45 +282,42 @@ function PendingClassificationRow({
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fde9cf] text-[#ad6e24]">
           <MoreHorizontal className="h-4 w-4" />
         </div>
-        <div>
-          <p className="font-medium text-primary">{session.title}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+        <div className="min-w-0">
+          <p className="max-w-[16ch] text-balance text-[clamp(1.02rem,1.35vw,1.18rem)] font-medium leading-tight text-primary">
+            {session.title}
+          </p>
+          <p className="mt-1 max-w-[18ch] text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">
             {session.company}
           </p>
         </div>
       </div>
 
-      <div className="pt-1 text-sm text-on-surface-variant">{session.date}</div>
+      <div className="max-w-[16ch] pt-1 text-sm leading-6 text-on-surface-variant">
+        {session.date}
+      </div>
       <div className="pt-1 text-sm text-on-surface-variant">{session.duration}</div>
 
-      <div className="pt-1">
-        <p className="text-sm font-medium text-primary">{session.client}</p>
+      <div className="min-w-0 pt-1">
+        <p className="max-w-[15ch] text-sm font-medium leading-6 text-primary">
+          {session.client}
+        </p>
         <p
-          className={`mt-1 text-[10px] uppercase tracking-[0.16em] ${
+          className={`mt-1 text-[10px] uppercase tracking-[0.14em] ${
             session.issue ? "text-danger" : "text-on-surface-variant"
           }`}
         >
-        {isUnclassified ? "Sin clasificar" : session.consultoraNombre ?? "Sin consultora"}
+          {isUnclassified ? "Sin clasificar" : session.consultoraNombre ?? "Sin consultora"}
         </p>
         {isUnclassified ? (
-          <p className="mt-1 text-[10px] font-medium text-on-surface-variant/70">
+          <p className="mt-1 max-w-[18ch] text-[10px] font-medium leading-5 text-on-surface-variant/70">
             Elegí una consultora activa antes de guardar.
           </p>
         ) : null}
       </div>
 
-      <div className="flex items-start justify-center pt-2">
-        <input
-          type="checkbox"
-          checked={facturable}
-          onChange={(event) => setFacturable(event.target.checked)}
-          className="h-4 w-4 rounded-sm border-outline-variant text-primary"
-        />
-      </div>
-
-      <div className="pt-1">
+      <div className="min-w-0 pt-1">
         {isEditing ? (
-          <div className="rounded-xl border border-outline-variant/25 bg-surface-container-low p-3">
+          <div className="rounded-xl border border-outline-variant/25 bg-surface-container-low p-2.5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
                 {selectedCourse ? "Editar asignación" : "Asignar curso"}
@@ -330,7 +326,7 @@ function PendingClassificationRow({
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-              className="inline-flex items-center gap-2 rounded-full border border-outline-variant/30 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant transition hover:bg-surface-container-high"
+                  className="inline-flex items-center gap-2 rounded-full border border-outline-variant/30 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant transition hover:bg-surface-container-high"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Contraer
@@ -338,7 +334,7 @@ function PendingClassificationRow({
               ) : null}
             </div>
 
-            <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            <div className="mt-3 grid gap-2.5 xl:grid-cols-2">
               <label className="space-y-2">
                 <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
                   Consultora
@@ -352,7 +348,7 @@ function PendingClassificationRow({
                     setSelectedCourseId("");
                     setIsEditing(true);
                   }}
-                  className="w-full rounded-lg border border-outline-variant/40 bg-surface px-3 py-2 text-xs text-primary outline-none"
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface px-2.5 py-2 text-xs text-primary outline-none"
                 >
                   <option value="">Seleccioná una consultora</option>
                   {consultoras.map((consultora) => (
@@ -375,7 +371,7 @@ function PendingClassificationRow({
                   value={selectedCourseId}
                   onChange={(event) => setSelectedCourseId(event.target.value)}
                   disabled={!consultoraId || loadingCursos}
-                  className="w-full rounded-lg border border-outline-variant/40 bg-surface px-3 py-2 text-xs text-primary outline-none disabled:opacity-60"
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface px-2.5 py-2 text-xs text-primary outline-none disabled:opacity-60"
                 >
                   <option value="">Elegí un curso existente</option>
                   {availableCursos.map((course) => (
@@ -388,29 +384,29 @@ function PendingClassificationRow({
             </div>
 
             {selectedCourse ? (
-              <div className="mt-3 rounded-xl bg-secondary-container/70 px-3 py-3 text-[10px] uppercase tracking-[0.16em] text-on-secondary-container">
+              <div className="mt-3 rounded-xl bg-secondary-container/70 px-3 py-2.5 text-[10px] uppercase tracking-[0.16em] text-on-secondary-container">
                 <p className="font-bold">Usando un curso del catálogo</p>
-                <p className="mt-1 text-[11px] normal-case tracking-normal">
+                <p className="mt-1 text-[11px] leading-4 normal-case tracking-normal">
                   {getCourseLabel(selectedCourse)}
                 </p>
               </div>
             ) : (
-              <div className="mt-3 rounded-xl bg-surface-container-low px-3 py-3 text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+              <div className="mt-3 rounded-xl bg-surface-container-low px-3 py-2.5 text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
                 <p className="font-bold">Elegí un curso existente</p>
-                <p className="mt-1 text-[11px] normal-case tracking-normal">
-                  Seleccioná una consultora y luego elegí uno de sus cursos activos.
+                <p className="mt-1 text-[11px] leading-4 normal-case tracking-normal">
+                  Elegí una consultora y después uno de sus cursos activos.
                 </p>
               </div>
             )}
 
-            <div className="mt-3 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-3">
+            <div className="mt-3 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
                     Guardar clasificación
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-on-surface-variant">
-                    Elegí si este cambio afecta solo esta clase o toda la serie repetida.
+                  <p className="mt-1 text-[11px] leading-4 text-on-surface-variant">
+                    El cambio se aplica a todas las clases con este mismo nombre.
                   </p>
                 </div>
                 <CheckCircle2 className="h-4 w-4 text-primary" />

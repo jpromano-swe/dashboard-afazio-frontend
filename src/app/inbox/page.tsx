@@ -48,7 +48,7 @@ export default async function InboxPage() {
           <MobileTableHint />
 
           <div className="mt-6 overflow-x-auto">
-            <div className="min-w-[1080px]">
+            <div className="min-w-[920px]">
               <div
                 className="grid border-b border-outline-variant/20 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70"
                 style={{ gridTemplateColumns: PENDING_CLASSIFICATION_COLUMNS }}
@@ -57,7 +57,6 @@ export default async function InboxPage() {
                 <div>Fecha y hora</div>
                 <div>Duración</div>
                 <div>Cliente / empresa</div>
-                <div className="text-center">Facturable</div>
                 <div className="text-right">Acciones</div>
               </div>
 
@@ -70,8 +69,8 @@ export default async function InboxPage() {
 
           <div className="mt-10 flex flex-col gap-4 border-t border-outline-variant/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-sm text-sm italic text-on-surface-variant">
-              Consejo: seleccioná varias filas para clasificar en lote cuando los
-              endpoints de mutación estén conectados.
+              Consejo: las clases quedan facturables por defecto. Solo necesitás elegir
+              la consultora y el curso correcto para guardarlas.
             </p>
             <div className="flex flex-wrap gap-3">
               <ActionButton variant="outline" disabled>
