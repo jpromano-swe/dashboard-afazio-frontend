@@ -236,6 +236,7 @@ export function MigrationClassRow({
     <tr className="hover:bg-surface-container-low/60">
       <td className="px-6 py-5 font-headline text-lg text-primary">
         {new Intl.DateTimeFormat("es-AR", {
+          timeZone: "America/Argentina/Buenos_Aires",
           month: "short",
           day: "2-digit",
           hour: "2-digit",

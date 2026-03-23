@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const data = await getDashboardData();
   const formattedDate = new Intl.DateTimeFormat("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
     weekday: "long",
     month: "long",
     day: "numeric",

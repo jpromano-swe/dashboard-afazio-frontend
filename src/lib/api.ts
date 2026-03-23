@@ -33,6 +33,7 @@ import {
 
 const DEFAULT_LOCALE = "es-AR";
 const DEFAULT_CURRENCY = "ARS";
+const DEFAULT_TIME_ZONE = "America/Argentina/Buenos_Aires";
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -62,6 +63,7 @@ function startOfWeek(date: Date) {
 
 function formatShortDate(dateInput: string | Date) {
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    timeZone: DEFAULT_TIME_ZONE,
     month: "short",
     day: "2-digit",
     year: "numeric",
@@ -70,6 +72,7 @@ function formatShortDate(dateInput: string | Date) {
 
 function formatMonthYear(dateInput: string | Date) {
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    timeZone: DEFAULT_TIME_ZONE,
     month: "long",
     year: "numeric",
   }).format(new Date(dateInput));
@@ -77,6 +80,7 @@ function formatMonthYear(dateInput: string | Date) {
 
 function formatTime(dateInput: string | Date) {
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    timeZone: DEFAULT_TIME_ZONE,
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(dateInput));
@@ -92,10 +96,30 @@ function formatDateRange(from: string | Date, to: string | Date) {
 
 function formatWeekdayLabel(dateInput: string | Date) {
   return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    timeZone: DEFAULT_TIME_ZONE,
     weekday: "short",
     day: "2-digit",
     month: "short",
   }).format(new Date(dateInput));
+}
+
+function toTimeZoneIsoDate(dateInput: string | Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DEFAULT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(dateInput));
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  if (!year || !month || !day) {
+    return toIsoDate(new Date(dateInput));
+  }
+
+  return `${year}-${month}-${day}`;
 }
 
 function formatCurrency(value: number, currency = DEFAULT_CURRENCY) {
@@ -188,13 +212,16 @@ function buildWeeklySchedule(classes: ClaseDelDiaResponse[], date = new Date()) 
     current.setDate(weekStart.getDate() + index);
     const dayKey = toIsoDate(current);
     const entries = classes
-      .filter((clase) => toIsoDate(new Date(clase.fechaInicio)) === dayKey)
+      .filter((clase) => toTimeZoneIsoDate(clase.fechaInicio) === dayKey)
       .filter((clase) => clase.estado === "PROGRAMADA")
       .filter((clase) => shouldIncludeClassTitle(clase.titulo))
       .map(mapClaseToScheduleEntry);
 
     return {
-      label: new Intl.DateTimeFormat(DEFAULT_LOCALE, { weekday: "long" }).format(current),
+      label: new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+        timeZone: DEFAULT_TIME_ZONE,
+        weekday: "long",
+      }).format(current),
       dateLabel: formatWeekdayLabel(current),
       entries,
     };

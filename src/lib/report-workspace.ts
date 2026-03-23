@@ -6,6 +6,8 @@ import {
   isRealConsultora,
 } from "@/lib/backend";
 
+const DEFAULT_TIME_ZONE = "America/Argentina/Buenos_Aires";
+
 type ReportTheme = "amber" | "purple";
 
 type ReportModuleConfig = {
@@ -68,6 +70,7 @@ function endOfMonth(date: Date) {
 
 function formatShortDate(dateInput: string | Date) {
   return new Intl.DateTimeFormat("es-AR", {
+    timeZone: DEFAULT_TIME_ZONE,
     month: "short",
     day: "2-digit",
     year: "numeric",
@@ -76,6 +79,7 @@ function formatShortDate(dateInput: string | Date) {
 
 function formatMonthYear(dateInput: string | Date) {
   return new Intl.DateTimeFormat("es-AR", {
+    timeZone: DEFAULT_TIME_ZONE,
     month: "long",
     year: "numeric",
   }).format(new Date(dateInput));
@@ -83,6 +87,7 @@ function formatMonthYear(dateInput: string | Date) {
 
 function formatTime(dateInput: string | Date) {
   return new Intl.DateTimeFormat("es-AR", {
+    timeZone: DEFAULT_TIME_ZONE,
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(dateInput));
