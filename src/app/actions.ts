@@ -14,6 +14,7 @@ import {
   type AsistenciaEstado,
   type ClaseEstadoDestino,
 } from "@/lib/backend";
+import { getSafeErrorMessage } from "@/lib/error-messages";
 
 const ATTENDANCE_STATES = new Set<AsistenciaEstado>([
   "PENDIENTE",
@@ -75,25 +76,13 @@ function revalidateOperationalViews() {
   revalidatePath("/parameters");
 }
 
-export type RateActionState = {
-  error: string | null;
-  success: string | null;
+export type MutationActionState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
 };
 
 function getActionErrorMessage(error: unknown) {
-  if (typeof error === "object" && error !== null && "message" in error) {
-    const message = String((error as { message?: unknown }).message ?? "").trim();
-
-    if (message) {
-      return message;
-    }
-  }
-
-  if (error instanceof Error && error.message.trim()) {
-    return error.message;
-  }
-
-  return "No se pudo crear la tarifa.";
+  return getSafeErrorMessage(error, "No se pudo completar la operación.");
 }
 
 export async function markAttendanceAction(formData: FormData) {
@@ -295,9 +284,9 @@ export async function assignExistingCourseSeriesAction(formData: FormData) {
 }
 
 export async function createRateAction(
-  _previousState: RateActionState,
+  _previousState: MutationActionState,
   formData: FormData,
-): Promise<RateActionState> {
+): Promise<MutationActionState> {
   try {
     await crearTarifa({
       consultoraId: getRequiredNumber(formData, "consultoraId"),
@@ -312,48 +301,93 @@ export async function createRateAction(
     revalidateOperationalViews();
 
     return {
-      error: null,
-      success: "Tarifa creada correctamente.",
+      status: "success",
+      message: "Tarifa creada correctamente.",
     };
   } catch (error) {
     return {
-      error: getActionErrorMessage(error),
-      success: null,
+      status: "error",
+      message: getActionErrorMessage(error),
     };
   }
 }
 
-export async function createConsultoraAction(formData: FormData) {
-  await crearConsultora({
-    nombre: getString(formData, "nombre"),
-    descripcion: getNullableString(formData, "descripcion"),
-    requiereReporteExcel: getBoolean(formData, "requiereReporteExcel"),
-    googleCalendarId: null,
-  });
+export async function createConsultoraAction(
+  _previousState: MutationActionState,
+  formData: FormData,
+): Promise<MutationActionState> {
+  try {
+    await crearConsultora({
+      nombre: getString(formData, "nombre"),
+      descripcion: getNullableString(formData, "descripcion"),
+      requiereReporteExcel: getBoolean(formData, "requiereReporteExcel"),
+      googleCalendarId: null,
+    });
 
-  revalidateOperationalViews();
+    revalidateOperationalViews();
+
+    return {
+      status: "success",
+      message: "Consultora creada correctamente.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: getActionErrorMessage(error),
+    };
+  }
 }
 
-export async function createCourseAction(formData: FormData) {
-  await crearCurso({
-    consultoraId: getRequiredNumber(formData, "consultoraId"),
-    empresa: getString(formData, "empresa"),
-    grupo: getNullableString(formData, "grupo"),
-    activa: true,
-  });
+export async function createCourseAction(
+  _previousState: MutationActionState,
+  formData: FormData,
+): Promise<MutationActionState> {
+  try {
+    await crearCurso({
+      consultoraId: getRequiredNumber(formData, "consultoraId"),
+      empresa: getString(formData, "empresa"),
+      grupo: getNullableString(formData, "grupo"),
+      activa: true,
+    });
 
-  revalidateOperationalViews();
+    revalidateOperationalViews();
+
+    return {
+      status: "success",
+      message: "Curso creado correctamente.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: getActionErrorMessage(error),
+    };
+  }
 }
 
-export async function updateCourseAction(formData: FormData) {
-  const cursoId = getRequiredNumber(formData, "cursoId");
+export async function updateCourseAction(
+  _previousState: MutationActionState,
+  formData: FormData,
+): Promise<MutationActionState> {
+  try {
+    const cursoId = getRequiredNumber(formData, "cursoId");
 
-  await actualizarCurso(cursoId, {
-    consultoraId: getRequiredNumber(formData, "consultoraId"),
-    empresa: getString(formData, "empresa"),
-    grupo: getNullableString(formData, "grupo"),
-    activa: getBoolean(formData, "activa"),
-  });
+    await actualizarCurso(cursoId, {
+      consultoraId: getRequiredNumber(formData, "consultoraId"),
+      empresa: getString(formData, "empresa"),
+      grupo: getNullableString(formData, "grupo"),
+      activa: getBoolean(formData, "activa"),
+    });
 
-  revalidateOperationalViews();
+    revalidateOperationalViews();
+
+    return {
+      status: "success",
+      message: "Curso actualizado correctamente.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: getActionErrorMessage(error),
+    };
+  }
 }

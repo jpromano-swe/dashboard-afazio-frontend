@@ -4,6 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarSync, LoaderCircle } from "lucide-react";
 import { ActionButton, StatusBadge } from "@/components/editorial";
+import { notifyError, notifySuccess } from "@/lib/client-toast";
+
+const NGROK_SKIP_BROWSER_WARNING_HEADER = {
+  "ngrok-skip-browser-warning": "1",
+};
 
 type HistoricalSyncPanelProps = {
   rangeLabel: string;
@@ -23,21 +28,17 @@ export function HistoricalSyncPanel({
   syncUrl,
 }: HistoricalSyncPanelProps) {
   const router = useRouter();
-  const [feedback, setFeedback] = useState<{
-    tone: "confirmed" | "danger";
-    message: string;
-  } | null>(null);
   const [isRefreshing, startTransition] = useTransition();
   const [isSyncing, setIsSyncing] = useState(false);
 
   async function handleSync() {
     setIsSyncing(true);
-    setFeedback(null);
 
     try {
       const response = await fetch(syncUrl, {
         method: "GET",
         credentials: "include",
+        headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
       });
       const contentType = response.headers.get("content-type") ?? "";
 
@@ -55,21 +56,18 @@ export function HistoricalSyncPanel({
 
       const payload = (await response.json()) as { processed?: number };
 
-      setFeedback({
-        tone: "confirmed",
-        message: `Se sincronizaron ${payload.processed ?? 0} evento${
+      notifySuccess(
+        "Sincronización completa",
+        `Se sincronizaron ${payload.processed ?? 0} evento${
           payload.processed === 1 ? "" : "s"
         } para ${rangeLabel}.`,
-      });
+      );
 
       startTransition(() => {
         router.refresh();
       });
     } catch (error) {
-      setFeedback({
-        tone: "danger",
-        message: getErrorMessage(error),
-      });
+      notifyError(error, getErrorMessage(error));
     } finally {
       setIsSyncing(false);
     }
@@ -110,11 +108,6 @@ export function HistoricalSyncPanel({
         </div>
       </div>
 
-      {feedback ? (
-        <div className="mt-4">
-          <StatusBadge tone={feedback.tone}>{feedback.message}</StatusBadge>
-        </div>
-      ) : null}
     </div>
   );
 }

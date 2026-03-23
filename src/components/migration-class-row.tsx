@@ -16,6 +16,7 @@ import {
   type ClaseDelDiaResponse,
   type CursoResponse,
 } from "@/lib/backend";
+import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 
 function getCourseLabel(course: CursoResponse) {
   return course.grupo ? `${course.empresa} - ${course.grupo}` : course.empresa;
@@ -102,6 +103,10 @@ export function MigrationClassRow({
         if (!cancelled) {
           setAvailableCursos([]);
           setSelectedCourseId("");
+          notifyWarning(
+            "No se pudieron cargar los cursos.",
+            "Probá nuevamente o revisá la conexión con el backend.",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -205,10 +210,23 @@ export function MigrationClassRow({
               await assignExistingCourseAction(fallbackFormData);
             }),
         );
+
+        notifyWarning(
+          "Serie aplicada con refuerzo local",
+          "El backend no propagó toda la serie y se completó sobre las clases visibles.",
+        );
       }
 
+      notifySuccess(
+        "Clasificación guardada",
+        processed > 1
+          ? `Se aplicó a ${processed} clases relacionadas.`
+          : "Se guardó la clasificación de la clase.",
+      );
       setIsEditing(false);
       router.refresh();
+    } catch (error) {
+      notifyError(error, "No se pudo guardar la clasificación.");
     } finally {
       setSavingMode(null);
     }

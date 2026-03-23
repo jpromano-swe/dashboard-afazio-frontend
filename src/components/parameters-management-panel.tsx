@@ -1,17 +1,24 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { CirclePlus, Building2, X } from "lucide-react";
 import {
   createConsultoraAction,
   createCourseAction,
+  type MutationActionState,
 } from "@/app/actions";
 import { ActionButton } from "@/components/editorial";
 import { type ConsultoraResponse } from "@/lib/backend";
+import { notifyError, notifySuccess } from "@/lib/client-toast";
 
 type ParametersManagementPanelProps = {
   consultoras: ConsultoraResponse[];
   backendUnavailable: boolean;
+};
+
+const INITIAL_MUTATION_STATE: MutationActionState = {
+  status: "idle",
+  message: null,
 };
 
 function Modal({
@@ -75,7 +82,51 @@ export function ParametersManagementPanel({
 }: ParametersManagementPanelProps) {
   const [openConsultora, setOpenConsultora] = useState(false);
   const [openCourse, setOpenCourse] = useState(false);
+  const [consultoraPending, startConsultoraTransition] = useTransition();
+  const [coursePending, startCourseTransition] = useTransition();
   const activeConsultoras = consultoras.filter((consultora) => consultora.activa);
+
+  function handleConsultoraSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    startConsultoraTransition(async () => {
+      const state = await createConsultoraAction(
+        INITIAL_MUTATION_STATE,
+        new FormData(form),
+      );
+
+      if (state.status === "success") {
+        notifySuccess("Consultora creada", state.message);
+        form.reset();
+        setOpenConsultora(false);
+        return;
+      }
+
+      notifyError(state.message ?? "No se pudo crear la consultora.");
+    });
+  }
+
+  function handleCourseSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    startCourseTransition(async () => {
+      const state = await createCourseAction(
+        INITIAL_MUTATION_STATE,
+        new FormData(form),
+      );
+
+      if (state.status === "success") {
+        notifySuccess("Curso creado", state.message);
+        form.reset();
+        setOpenCourse(false);
+        return;
+      }
+
+      notifyError(state.message ?? "No se pudo crear el curso.");
+    });
+  }
 
   return (
     <>
@@ -125,7 +176,7 @@ export function ParametersManagementPanel({
         subtitle="Escribe directamente en `POST /api/consultoras`."
         onClose={() => setOpenConsultora(false)}
       >
-        <form action={createConsultoraAction} className="space-y-4">
+        <form onSubmit={handleConsultoraSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="consultora-nombre"
@@ -178,10 +229,10 @@ export function ParametersManagementPanel({
             type="submit"
             variant="primary"
             icon={<CirclePlus className="h-4 w-4" />}
-            disabled={backendUnavailable}
+            disabled={backendUnavailable || consultoraPending}
             className="w-full justify-center"
           >
-            Crear consultora
+            {consultoraPending ? "Guardando..." : "Crear consultora"}
           </ActionButton>
         </form>
       </Modal>
@@ -192,7 +243,7 @@ export function ParametersManagementPanel({
         subtitle="Elegí una consultora activa y luego creá un curso con empresa y grupo."
         onClose={() => setOpenCourse(false)}
       >
-        <form action={createCourseAction} className="space-y-4">
+        <form onSubmit={handleCourseSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="course-consultora"
@@ -261,10 +312,10 @@ export function ParametersManagementPanel({
             type="submit"
             variant="primary"
             icon={<Building2 className="h-4 w-4" />}
-            disabled={backendUnavailable || activeConsultoras.length === 0}
+            disabled={backendUnavailable || activeConsultoras.length === 0 || coursePending}
             className="w-full justify-center"
           >
-            Crear curso
+            {coursePending ? "Guardando..." : "Crear curso"}
           </ActionButton>
         </form>
       </Modal>

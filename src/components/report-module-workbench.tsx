@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, Copy, Download, Mail, Send } from "lucide-react";
 import { ActionButton, SectionFrame, StatusBadge } from "@/components/editorial";
+import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 import type { ReportTheme, ReportWorkspaceData } from "@/lib/report-workspace";
 
 type ReportModuleWorkbenchProps = {
@@ -71,14 +72,20 @@ export function ReportModuleWorkbench({
     try {
       await navigator.clipboard.writeText(message);
       setCopied(true);
+      notifySuccess("Mensaje copiado", "El texto quedó listo para pegar en tu correo.");
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
       setCopied(false);
+      notifyError(undefined, "No se pudo copiar el mensaje.");
     }
   }
 
   function handleMockSend() {
     setSent(true);
+    notifyWarning(
+      "Envío simulado",
+      "El backend de correo todavía no está conectado. No se envió un email real.",
+    );
     window.setTimeout(() => setSent(false), 2200);
   }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Serif } from "next/font/google";
+import { AppToaster } from "@/components/app-toaster";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,6 +35,7 @@ export default function RootLayout({
         className="min-h-full bg-background text-on-surface antialiased"
       >
         {children}
+        <AppToaster />
       </body>
     </html>
   );

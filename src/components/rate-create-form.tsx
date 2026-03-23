@@ -1,25 +1,39 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
-import { createRateAction, type RateActionState } from "@/app/actions";
+import { createRateAction, type MutationActionState } from "@/app/actions";
 import { ActionButton } from "@/components/editorial";
 import type { ConsultoraResponse } from "@/lib/backend";
+import { notifyError, notifySuccess } from "@/lib/client-toast";
 
 type RateCreateFormProps = {
   activeConsultoras: ConsultoraResponse[];
 };
 
-const INITIAL_STATE: RateActionState = {
-  error: null,
-  success: null,
+const INITIAL_STATE: MutationActionState = {
+  status: "idle",
+  message: null,
 };
 
 export function RateCreateForm({ activeConsultoras }: RateCreateFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(createRateAction, INITIAL_STATE);
 
+  useEffect(() => {
+    if (state.status === "success") {
+      notifySuccess("Tarifa guardada", state.message);
+      formRef.current?.reset();
+      return;
+    }
+
+    if (state.status === "error") {
+      notifyError(state.message ?? "No se pudo crear la tarifa.");
+    }
+  }, [state]);
+
   return (
-    <form action={formAction} className="mt-6 grid gap-4 md:grid-cols-2">
+    <form ref={formRef} action={formAction} className="mt-6 grid gap-4 md:grid-cols-2">
       <div className="space-y-2 md:col-span-2">
         <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
           Consultora
@@ -131,18 +145,6 @@ export function RateCreateForm({ activeConsultoras }: RateCreateFormProps) {
           className="min-h-24 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-3 text-sm text-primary outline-none placeholder:text-on-surface-variant/60"
         />
       </div>
-
-      {state.error ? (
-        <div className="rounded-xl border border-[#f1a2a2] bg-[#ffe3e3] px-4 py-3 text-sm leading-6 text-[#8e1212] md:col-span-2">
-          {state.error}
-        </div>
-      ) : null}
-
-      {state.success ? (
-        <div className="rounded-xl border border-[#b8dfc3] bg-[#e5f6ea] px-4 py-3 text-sm leading-6 text-[#1f5d31] md:col-span-2">
-          {state.success}
-        </div>
-      ) : null}
 
       <ActionButton
         type="submit"

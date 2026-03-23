@@ -12,6 +12,7 @@ import {
   updateClassStatusAction,
 } from "@/app/actions";
 import type { ClaseEstadoDestino } from "@/lib/backend";
+import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 
 type ConfirmationConfig = {
   title: string;
@@ -171,6 +172,12 @@ export function BulkTaughtAction({
 
       await markAllClassesTaughtAction(formData);
       setOpen(false);
+      notifySuccess(
+        classIds.length === 1 ? "Clase actualizada" : "Clases actualizadas",
+        `${classIds.length} ${classIds.length === 1 ? "clase marcada" : "clases marcadas"} como dictadas.`,
+      );
+    } catch (error) {
+      notifyError(error, "No se pudieron marcar las clases como dictadas.");
     } finally {
       setPending(false);
     }
@@ -230,12 +237,20 @@ export function ScheduleStatusActions({
 
       if (selectedStatus === "DICTADA") {
         await markClassAsTaughtAction(formData);
+        notifySuccess("Clase marcada como dictada", classTitle);
       } else {
         formData.set("estado", selectedStatus);
         await updateClassStatusAction(formData);
+        if (selectedStatus === "REPROGRAMADA") {
+          notifyWarning("Clase reprogramada", classTitle);
+        } else {
+          notifyWarning("Clase cancelada", classTitle);
+        }
       }
 
       setSelectedStatus(null);
+    } catch (error) {
+      notifyError(error, "No se pudo actualizar el estado de la clase.");
     } finally {
       setPending(false);
     }

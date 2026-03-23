@@ -20,6 +20,7 @@ import {
   type ConsultoraResponse,
   type CursoResponse,
 } from "@/lib/backend";
+import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 import type { ImportedSession } from "@/lib/data";
 
 type PendingClassificationTableProps = {
@@ -129,6 +130,10 @@ function PendingClassificationRow({
         if (!cancelled) {
           setAvailableCursos([]);
           setSelectedCourseId("");
+          notifyWarning(
+            "No se pudieron cargar los cursos.",
+            "Probá nuevamente o revisá la conexión con el backend.",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -242,13 +247,28 @@ function PendingClassificationRow({
                 await assignExistingCourseAction(fallbackFormData);
               }),
           );
+
+          notifyWarning(
+            "Serie aplicada con refuerzo local",
+            "El backend no propagó toda la serie y se completó sobre las clases visibles.",
+          );
         }
+
+        notifySuccess(
+          "Clasificación guardada",
+          processed > 1
+            ? `Se aplicó a ${processed} clases relacionadas.`
+            : "Se guardó la clasificación de la clase.",
+        );
       } else {
         await excludeClassificationAction(formData);
+        notifyWarning("Clase excluida", "La clase quedó marcada como no facturable.");
       }
 
       setIsEditing(false);
       router.refresh();
+    } catch (error) {
+      notifyError(error, "No se pudo guardar la clasificación.");
     } finally {
       setSavingMode(null);
     }

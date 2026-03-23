@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
-import { updateCourseAction } from "@/app/actions";
+import { updateCourseAction, type MutationActionState } from "@/app/actions";
 import { type ConsultoraResponse, type CursoResponse } from "@/lib/backend";
 import { ActionButton, StatusBadge } from "@/components/editorial";
+import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 
 type CourseCardActionsProps = {
   curso: CursoResponse;
   consultoras: ConsultoraResponse[];
   backendUnavailable: boolean;
+};
+
+const INITIAL_MUTATION_STATE: MutationActionState = {
+  status: "idle",
+  message: null,
 };
 
 function Modal({
@@ -74,6 +80,27 @@ export function CourseCardActions({
 }: CourseCardActionsProps) {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  function handleUpdateSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    startTransition(async () => {
+      const state = await updateCourseAction(
+        INITIAL_MUTATION_STATE,
+        new FormData(form),
+      );
+
+      if (state.status === "success") {
+        notifySuccess("Curso actualizado", state.message);
+        setOpenEdit(false);
+        return;
+      }
+
+      notifyError(state.message ?? "No se pudo actualizar el curso.");
+    });
+  }
 
   return (
     <>
@@ -88,7 +115,13 @@ export function CourseCardActions({
         </button>
         <button
           type="button"
-          onClick={() => setOpenDelete(true)}
+          onClick={() => {
+            setOpenDelete(true);
+            notifyWarning(
+              "El borrado de cursos todavía no está disponible.",
+              "El backend aún no expone DELETE /api/cursos/{id}.",
+            );
+          }}
           className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-[#ffe5e5] hover:text-[#b42318]"
           aria-label={`Eliminar curso ${curso.id}`}
         >
@@ -103,8 +136,7 @@ export function CourseCardActions({
         onClose={() => setOpenEdit(false)}
       >
         <form
-          action={updateCourseAction}
-          onSubmit={() => setOpenEdit(false)}
+          onSubmit={handleUpdateSubmit}
           className="space-y-4"
         >
           <input type="hidden" name="cursoId" value={curso.id} />
@@ -195,9 +227,9 @@ export function CourseCardActions({
               variant="primary"
               icon={<Pencil className="h-4 w-4" />}
               className="justify-center"
-              disabled={backendUnavailable || consultoras.length === 0}
+              disabled={backendUnavailable || consultoras.length === 0 || pending}
             >
-              Guardar cambios
+              {pending ? "Guardando..." : "Guardar cambios"}
             </ActionButton>
           </div>
         </form>

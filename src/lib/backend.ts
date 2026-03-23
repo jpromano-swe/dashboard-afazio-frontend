@@ -251,6 +251,10 @@ export const basicAuth = `Basic ${Buffer.from(
   `${BASIC_AUTH_USERNAME}:${BASIC_AUTH_PASSWORD}`,
 ).toString("base64")}`;
 
+export const NGROK_SKIP_BROWSER_WARNING_HEADER = {
+  "ngrok-skip-browser-warning": "1",
+};
+
 export class BackendConfigError extends Error {
   constructor(message: string) {
     super(message);
@@ -270,10 +274,14 @@ function buildBackendUrl(path: string) {
   return null;
 }
 
-function getJsonHeaders(body?: BodyInit | null, headers?: HeadersInit): HeadersInit {
+export function getBackendRequestHeaders(
+  body?: BodyInit | null,
+  headers?: HeadersInit,
+): HeadersInit {
   return {
     Authorization: basicAuth,
     Accept: "application/json",
+    ...NGROK_SKIP_BROWSER_WARNING_HEADER,
     ...(body ? { "Content-Type": "application/json" } : {}),
     ...(headers ?? {}),
   };
@@ -294,7 +302,7 @@ export async function apiFetch<T>(
   const response = await fetch(url, {
     ...init,
     cache: "no-store",
-    headers: getJsonHeaders(init?.body, init?.headers),
+    headers: getBackendRequestHeaders(init?.body, init?.headers),
   });
 
   if (!response.ok) {
@@ -335,7 +343,7 @@ export function getGoogleSyncRangeForMonth(date = new Date(), utcOffset = "-03:0
   };
 }
 
-export function getExcelReportUrl(consultoraId: number, periodo: string) {
+export function getBackendExcelReportUrl(consultoraId: number, periodo: string) {
   const params = new URLSearchParams({
     consultoraId: String(consultoraId),
     periodo,
@@ -343,6 +351,15 @@ export function getExcelReportUrl(consultoraId: number, periodo: string) {
   const path = `/api/reportes/excel?${params.toString()}`;
 
   return buildBackendUrl(path) ?? path;
+}
+
+export function getExcelReportUrl(consultoraId: number, periodo: string) {
+  const params = new URLSearchParams({
+    consultoraId: String(consultoraId),
+    periodo,
+  });
+
+  return `/api/reportes/excel?${params.toString()}`;
 }
 
 export function getConsultoraSeeds(): FrontendConsultoraSeed[] {
