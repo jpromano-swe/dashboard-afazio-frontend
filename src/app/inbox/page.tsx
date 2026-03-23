@@ -27,7 +27,68 @@ export default async function InboxPage() {
       title="Clases Pendientes"
       actions={<PageActions />}
     >
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.85fr)_320px]">
+      <div className="space-y-8">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+          <SectionFrame className="bg-surface-container-lowest">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline text-3xl font-bold text-primary">
+                Resumen pendiente
+              </h3>
+              <CircleAlert className="h-5 w-5 text-[#ad6e24]" />
+            </div>
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2">
+              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4 sm:block sm:border-b-0 sm:rounded-[1.1rem] sm:bg-surface-container-low sm:p-5">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
+                  Horas sin clasificar
+                </span>
+                <span className="font-headline text-4xl font-bold text-primary">
+                  {data.pendingHours}
+                </span>
+              </div>
+              <div className="flex items-center justify-between sm:block sm:rounded-[1.1rem] sm:bg-surface-container-low sm:p-5">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
+                  Valor facturable estimado
+                </span>
+                <span className="font-headline text-4xl font-bold text-primary">
+                  {data.estimatedValue}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[1.2rem] bg-[#fde9cf] p-5 text-sm leading-6 text-[#634010]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em]">
+                Consejo de clasificación
+              </p>
+              <p className="mt-2">{data.classificationTip}</p>
+              <p className="mt-3 text-xs leading-5">
+                {activeConsultoras.length > 0
+                  ? "Elegí primero una consultora. La fila luego carga los cursos activos de esa consultora y te deja asignar un curso existente a esta clase o a toda la serie repetida."
+                  : "La búsqueda de consultoras no está disponible en esta solicitud, así que la clasificación por curso no puede iniciar hasta que `/api/consultoras` vuelva a responder."}
+              </p>
+            </div>
+
+            {data.backendNotice ? (
+              <p className="mt-4 text-xs leading-6 text-on-surface-variant">
+                {data.backendNotice}
+              </p>
+            ) : null}
+          </SectionFrame>
+
+          <SectionFrame className="bg-surface-container-lowest">
+            <div className="paper-grid rounded-[1.2rem] border border-dashed border-outline-variant/50 p-5">
+              <div className="space-y-4">
+                <div className="h-5 w-full rounded bg-surface-container-highest" />
+                <div className="h-5 w-5/6 rounded bg-surface-container-highest" />
+                <div className="h-5 w-4/5 rounded bg-[#fde9cf]" />
+              </div>
+              <p className="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
+                Visualizador de agenda
+              </p>
+            </div>
+          </SectionFrame>
+        </div>
+
         <SectionFrame className="bg-surface-container-lowest">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -82,67 +143,6 @@ export default async function InboxPage() {
             </div>
           </div>
         </SectionFrame>
-
-        <div className="space-y-6">
-          <SectionFrame className="bg-surface-container-lowest">
-            <div className="flex items-center justify-between">
-              <h3 className="font-headline text-3xl font-bold text-primary">
-                Resumen pendiente
-              </h3>
-              <CircleAlert className="h-5 w-5 text-[#ad6e24]" />
-            </div>
-
-            <div className="mt-8 space-y-5">
-              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
-                  Horas sin clasificar
-                </span>
-                <span className="font-headline text-4xl font-bold text-primary">
-                  {data.pendingHours}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
-                  Valor facturable estimado
-                </span>
-                <span className="font-headline text-4xl font-bold text-primary">
-                  {data.estimatedValue}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-[1.2rem] bg-[#fde9cf] p-5 text-sm leading-6 text-[#634010]">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em]">
-                Consejo de clasificación
-              </p>
-              <p className="mt-2">{data.classificationTip}</p>
-              <p className="mt-3 text-xs leading-5">
-                {activeConsultoras.length > 0
-                  ? "Elegí primero una consultora. La fila luego carga los cursos activos de esa consultora y te deja asignar un curso existente a esta clase o a toda la serie repetida."
-                  : "La búsqueda de consultoras no está disponible en esta solicitud, así que la clasificación por curso no puede iniciar hasta que `/api/consultoras` vuelva a responder."}
-              </p>
-            </div>
-
-            {data.backendNotice ? (
-              <p className="mt-4 text-xs leading-6 text-on-surface-variant">
-                {data.backendNotice}
-              </p>
-            ) : null}
-          </SectionFrame>
-
-          <SectionFrame className="bg-surface-container-lowest">
-            <div className="paper-grid rounded-[1.2rem] border border-dashed border-outline-variant/50 p-5">
-              <div className="space-y-4">
-                <div className="h-5 w-full rounded bg-surface-container-highest" />
-                <div className="h-5 w-5/6 rounded bg-surface-container-highest" />
-                <div className="h-5 w-4/5 rounded bg-[#fde9cf]" />
-              </div>
-              <p className="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
-                Visualizador de agenda
-              </p>
-            </div>
-          </SectionFrame>
-        </div>
       </div>
     </DashboardShell>
   );
