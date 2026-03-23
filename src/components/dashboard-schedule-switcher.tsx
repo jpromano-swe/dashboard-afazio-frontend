@@ -122,11 +122,7 @@ export function DashboardScheduleSwitcher({
           </p>
           <div className="mt-3 flex min-h-[104px] items-end sm:min-h-[84px]">
             <div
-              className={`flex flex-wrap items-center gap-3 transition-all duration-300 ease-out ${
-                view === "today"
-                  ? "translate-x-0 opacity-100"
-                  : "translate-x-3 opacity-100"
-              }`}
+              className="flex translate-x-0 flex-wrap items-center gap-3 opacity-100 transition-all duration-300 ease-out"
             >
               <h2 className="max-w-[12ch] font-headline text-[2.45rem] font-bold leading-[0.96] text-primary sm:max-w-none sm:text-[3.2rem]">
                 {view === "today" ? "Agenda de hoy" : "Clases de esta semana"}
