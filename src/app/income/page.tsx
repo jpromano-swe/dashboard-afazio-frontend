@@ -208,15 +208,34 @@ export default async function IncomePage({
           </p>
           <div className="mt-6 flex items-start justify-between gap-4">
             <div>
-              <p className="font-sans text-5xl font-black tracking-[-0.05em] text-primary">
-                {showDistinctTotals
-                  ? view.billedIncome
-                  : `${view.billedRatio} | ${view.billedHours}`}
-              </p>
+              {showDistinctTotals ? (
+                <p className="font-sans text-5xl font-black tracking-[-0.05em] text-primary">
+                  {view.billedIncome}
+                </p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
+                      Clases
+                    </p>
+                    <p className="mt-2 font-sans text-4xl font-black tracking-[-0.05em] text-primary">
+                      {view.billedRatio.replace(" clases", "")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
+                      Horas
+                    </p>
+                    <p className="mt-2 font-sans text-4xl font-black tracking-[-0.05em] text-primary">
+                      {view.billedHours.replace(" horas", "")}
+                    </p>
+                  </div>
+                </div>
+              )}
               <p className="mt-3 text-sm text-on-surface-variant">
                 {showDistinctTotals
                   ? "Horas ya validadas e incluidas en este filtro."
-                  : `Resumen de ${view.billedRatio} con ${view.billedHours} cargadas en este período.`}
+                  : "Resumen total contabilizado en el período actual."}
               </p>
             </div>
             {showDistinctTotals ? (
