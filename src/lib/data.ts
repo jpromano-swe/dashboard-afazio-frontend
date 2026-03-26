@@ -121,6 +121,7 @@ export type IncomeData = {
   estimatedIncome: string;
   billedIncome: string;
   billedRatio: string;
+  billedHours: string;
   pendingApproval: string;
   pendingRatio: string;
   ledgerRows: IncomeRow[];
@@ -334,6 +335,7 @@ export const incomeData: IncomeData = {
   estimatedIncome: "$12,450.00",
   billedIncome: "$8,120.00",
   billedRatio: "65% del total",
+  billedHours: "24.5 horas",
   pendingApproval: "$4,330.00",
   pendingRatio: "40%",
   ledgerRows: [

@@ -209,12 +209,14 @@ export default async function IncomePage({
           <div className="mt-6 flex items-start justify-between gap-4">
             <div>
               <p className="font-sans text-5xl font-black tracking-[-0.05em] text-primary">
-                {showDistinctTotals ? view.billedIncome : view.billedRatio}
+                {showDistinctTotals
+                  ? view.billedIncome
+                  : `${view.billedRatio} | ${view.billedHours}`}
               </p>
               <p className="mt-3 text-sm text-on-surface-variant">
                 {showDistinctTotals
                   ? "Horas ya validadas e incluidas en este filtro."
-                  : `${view.pendingRatio}. ${view.status}.`}
+                  : `Resumen de ${view.billedRatio} con ${view.billedHours} cargadas en este período.`}
               </p>
             </div>
             {showDistinctTotals ? (

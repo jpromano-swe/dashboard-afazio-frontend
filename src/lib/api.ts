@@ -760,6 +760,7 @@ export async function getIncomeData(
     estimatedIncome: formatCurrency(0),
     billedIncome: formatCurrency(0),
     billedRatio: "0 clases",
+    billedHours: "0 horas",
     pendingApproval: "00",
     pendingRatio: "Limpio",
     ledgerRows: [],
@@ -778,6 +779,7 @@ export async function getIncomeData(
       (entry) => !isPendingClassification(entry.sinClasificar, entry.consultoraNombre),
     );
     const billableTotal = sumBy(billableEntries, (entry) => entry.importeCalculado);
+    const billableHours = sumBy(billableEntries, (entry) => entry.duracionMinutos) / 60;
 
     return {
       ...incomeData,
@@ -787,6 +789,7 @@ export async function getIncomeData(
       estimatedIncome: formatCurrency(billableTotal),
       billedIncome: formatCurrency(billableTotal),
       billedRatio: `${billableEntries.length} clases`,
+      billedHours: `${formatHours(billableHours * 60)} horas`,
       pendingApproval: String(pendingEntries.length).padStart(2, "0"),
       pendingRatio:
         pendingEntries.length > 0 ? `${pendingEntries.length} pendientes` : "Limpio",

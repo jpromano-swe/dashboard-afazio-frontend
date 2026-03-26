@@ -165,11 +165,6 @@ export function DashboardScheduleSwitcher({
               <h2 className="max-w-[12ch] font-headline text-[2.45rem] font-bold leading-[0.96] text-primary sm:max-w-none sm:text-[3.2rem]">
                 {view === "today" ? "Agenda de hoy" : "Clases de esta semana"}
               </h2>
-              {view === "weekly" ? (
-                <StatusBadge tone="confirmed" className="shrink-0 self-center">
-                  {String(weeklyClassCount).padStart(2, "0")}
-                </StatusBadge>
-              ) : null}
             </div>
           </div>
           <p className="mt-3 text-sm text-on-surface-variant">
