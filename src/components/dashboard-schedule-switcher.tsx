@@ -19,6 +19,10 @@ type DashboardScheduleSwitcherProps = {
 
 function getConsultoraTone(consultoraName: string | null | undefined) {
   const normalized = (consultoraName ?? "").trim().toLowerCase();
+  const isIndependentConsultora =
+    normalized.startsWith("ind.") ||
+    normalized.startsWith("ind ") ||
+    normalized.includes("independ");
 
   if (normalized.includes("haskler")) {
     return {
@@ -36,7 +40,7 @@ function getConsultoraTone(consultoraName: string | null | undefined) {
     };
   }
 
-  if (normalized.includes("independ")) {
+  if (isIndependentConsultora) {
     return {
       row: "bg-[#f7ddd5] hover:bg-[#efcfc5]",
       card: "bg-[#fae6e0] border-[#ebc6bc]",

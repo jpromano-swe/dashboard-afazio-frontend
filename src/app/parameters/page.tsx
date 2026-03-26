@@ -12,6 +12,52 @@ import { CourseCardActions } from "@/components/course-card-actions";
 import { ParametersManagementPanel } from "@/components/parameters-management-panel";
 import { getConsultoras, getCursos, isRealConsultora } from "@/lib/backend";
 
+function getConsultoraColorScheme(name: string) {
+  const normalized = name.trim().toLowerCase();
+
+  if (normalized.includes("haskler")) {
+    return {
+      frame: "border-[#d9cff6] bg-[#f6f1ff]",
+      icon: "bg-[#e3d8fb] text-[#42315f]",
+      metric: "bg-[#efe7ff]",
+      courses: "border-[#dacbf6] bg-[#f4edff]",
+      courseCard: "bg-white/78",
+      courseExpanded: "bg-[#efe8ff]",
+    };
+  }
+
+  if (normalized.includes("blc")) {
+    return {
+      frame: "border-[#ead48d] bg-[#fcf4dc]",
+      icon: "bg-[#f6e9b7] text-[#5c4b17]",
+      metric: "bg-[#fbf0c6]",
+      courses: "border-[#e7d08a] bg-[#fdf4d6]",
+      courseCard: "bg-white/72",
+      courseExpanded: "bg-[#fbefc3]",
+    };
+  }
+
+  if (normalized.startsWith("ind.") || normalized.startsWith("ind ")) {
+    return {
+      frame: "border-[#efc3b9] bg-[#fce9e4]",
+      icon: "bg-[#f6d5cb] text-[#6d3e35]",
+      metric: "bg-[#f9dfd7]",
+      courses: "border-[#ebbcb1] bg-[#fce6e0]",
+      courseCard: "bg-white/74",
+      courseExpanded: "bg-[#f9ddd4]",
+    };
+  }
+
+  return {
+    frame: "border-outline-variant/18 bg-surface-container-lowest",
+    icon: "bg-secondary-container text-on-secondary-container",
+    metric: "bg-surface-container-low",
+    courses: "border-outline-variant/45 bg-surface-container-low",
+    courseCard: "bg-surface",
+    courseExpanded: "bg-surface-container-low",
+  };
+}
+
 export default async function ParametersPage() {
   let backendUnavailable = false;
   let consultoras = [] as Awaited<ReturnType<typeof getConsultoras>>;
@@ -134,14 +180,17 @@ export default async function ParametersPage() {
 
         {consultoras.length > 0 ? (
           <div className="mt-6 grid gap-6 xl:grid-cols-2">
-            {consultorasWithCursos.map(({ consultora, cursos }) => (
+            {consultorasWithCursos.map(({ consultora, cursos }) => {
+              const colorScheme = getConsultoraColorScheme(consultora.nombre);
+
+              return (
               <SectionFrame
                 key={consultora.id}
-                className="relative bg-surface-container-lowest"
+                className={`relative border ${colorScheme.frame}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary-container text-on-secondary-container">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${colorScheme.icon}`}>
                       <Building2 className="h-6 w-6" />
                     </div>
                     <div>
@@ -160,7 +209,7 @@ export default async function ParametersPage() {
                 </div>
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.1rem] bg-surface-container-low px-5 py-4">
+                  <div className={`rounded-[1.1rem] px-5 py-4 ${colorScheme.metric}`}>
                     <div className="flex items-center gap-2 text-on-surface-variant">
                       <FileSpreadsheet className="h-4 w-4" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -173,7 +222,7 @@ export default async function ParametersPage() {
               </div>
                 </div>
 
-                <div className="mt-8 rounded-[1.2rem] border border-dashed border-outline-variant/45 bg-surface-container-low p-5">
+                <div className={`mt-8 rounded-[1.2rem] border border-dashed p-5 ${colorScheme.courses}`}>
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 text-on-surface-variant">
@@ -197,7 +246,7 @@ export default async function ParametersPage() {
                         {cursos.slice(0, 4).map((curso) => (
                           <div
                             key={curso.id}
-                            className="group/course relative rounded-xl bg-surface px-4 py-3 pr-24"
+                            className={`group/course relative rounded-xl px-4 py-3 pr-24 ${colorScheme.courseCard}`}
                           >
                             <CourseCardActions
                               curso={curso}
@@ -220,7 +269,7 @@ export default async function ParametersPage() {
 
                       {cursos.length > 4 ? (
                         <div
-                          className="rounded-xl border border-outline-variant/18 bg-surface px-4 py-3"
+                          className={`rounded-xl border border-outline-variant/18 px-4 py-3 ${colorScheme.courseCard}`}
                         >
                           <details>
                             <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
@@ -230,7 +279,7 @@ export default async function ParametersPage() {
                               {cursos.slice(4).map((curso) => (
                                 <div
                                   key={curso.id}
-                                  className="group/course relative rounded-xl bg-surface-container-low px-4 py-3 pr-24"
+                                  className={`group/course relative rounded-xl px-4 py-3 pr-24 ${colorScheme.courseExpanded}`}
                                 >
                                   <CourseCardActions
                                     curso={curso}
@@ -255,7 +304,7 @@ export default async function ParametersPage() {
                       ) : null}
                     </div>
                   ) : (
-                    <div className="mt-5 rounded-xl bg-surface px-4 py-3">
+                    <div className={`mt-5 rounded-xl px-4 py-3 ${colorScheme.courseCard}`}>
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
                         Estado del catálogo
                       </p>
@@ -266,7 +315,8 @@ export default async function ParametersPage() {
                   )}
                 </div>
               </SectionFrame>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <SectionFrame className="mt-6 bg-surface-container-lowest text-center">
