@@ -182,7 +182,7 @@ export default async function IncomePage({
         </form>
       </SectionFrame>
 
-      <div className={`mt-10 grid gap-6 ${showDistinctTotals ? "lg:grid-cols-2" : "lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]"}`}>
+      <div className={`mt-10 grid gap-6 ${showDistinctTotals ? "lg:grid-cols-2" : "lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]"}`}>
         <div className="paper-panel rounded-[1.4rem] bg-primary-container p-8 text-on-primary">
           <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#c3d4c6]">
             Total facturable del período
@@ -213,24 +213,13 @@ export default async function IncomePage({
                   {view.billedIncome}
                 </p>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
-                      Clases
-                    </p>
-                    <p className="mt-2 font-sans text-4xl font-black tracking-[-0.05em] text-primary">
-                      {view.billedRatio.replace(" clases", "")}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
-                      Horas
-                    </p>
-                    <p className="mt-2 font-sans text-4xl font-black tracking-[-0.05em] text-primary">
-                      {view.billedHours.replace(" horas", "")}
-                    </p>
-                  </div>
-                </div>
+                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-2 font-sans text-[2.65rem] font-black tracking-[-0.05em] text-primary">
+                  <span>{view.billedRatio}</span>
+                  <span className="text-[1.4rem] font-semibold tracking-normal text-on-surface-variant/60">
+                    •
+                  </span>
+                  <span>{view.billedHours}</span>
+                </p>
               )}
               <p className="mt-3 text-sm text-on-surface-variant">
                 {showDistinctTotals
