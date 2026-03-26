@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
+  MoreVertical,
   TriangleAlert,
 } from "lucide-react";
 import {
@@ -45,6 +46,9 @@ const TONE_STYLES = {
     accent: "bg-danger/85",
   },
 } as const;
+
+const DARK_ACTION_BUTTON =
+  "!bg-[#1f2924] !text-[#f8f4ec] hover:!bg-[#0f1713] hover:scale-[1.03] shadow-[0_14px_28px_rgba(8,18,12,0.18)]";
 
 function getStatusConfirmation(
   status: ClaseEstadoDestino,
@@ -105,11 +109,15 @@ function ConfirmationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[1200] grid place-items-center bg-surface/55 px-4 backdrop-blur-[2px]">
+    <div
+      className="fixed inset-0 z-[1200] grid place-items-center bg-surface/55 px-4 backdrop-blur-[2px]"
+      onClick={onCancel}
+    >
       <div
         role="dialog"
         aria-modal="true"
         className="relative w-full max-w-[32rem] overflow-hidden rounded-[1.75rem] border border-outline-variant/30 bg-surface-container-lowest shadow-[0_30px_90px_rgba(6,27,14,0.22)]"
+        onClick={(event) => event.stopPropagation()}
       >
         <div className={`h-1.5 w-full ${TONE_STYLES[tone].accent}`} />
         <div className="p-6 sm:p-7">
@@ -189,7 +197,7 @@ export function BulkTaughtAction({
         type="button"
         onClick={() => setOpen(true)}
         disabled={classIds.length === 0 || pending}
-        className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-primary shadow-[0_16px_28px_rgb(6_27_14_/_0.14)] transition hover:opacity-92 disabled:pointer-events-none disabled:opacity-55"
+        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition disabled:pointer-events-none disabled:opacity-55 ${DARK_ACTION_BUTTON}`}
       >
         Marcar todas como dictadas
       </button>
@@ -218,10 +226,28 @@ export function ScheduleStatusActions({
 }) {
   const [selectedStatus, setSelectedStatus] = useState<ClaseEstadoDestino | null>(null);
   const [pending, setPending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const confirmation = selectedStatus
     ? getStatusConfirmation(selectedStatus, classTitle)
     : null;
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    window.addEventListener("mousedown", handlePointerDown);
+
+    return () => window.removeEventListener("mousedown", handlePointerDown);
+  }, [menuOpen]);
 
   async function handleConfirm() {
     if (!selectedStatus) {
@@ -263,26 +289,49 @@ export function ScheduleStatusActions({
           type="button"
           onClick={() => setSelectedStatus("DICTADA")}
           disabled={pending}
-          className={`rounded-xl px-0 py-0 text-[11px] font-bold uppercase tracking-[0.18em] transition disabled:opacity-45 ${TONE_STYLES.primary.trigger}`}
+          className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition disabled:opacity-45 ${DARK_ACTION_BUTTON}`}
         >
+          <CheckCircle2 className="h-3.5 w-3.5" />
           Marcar como dictada
         </button>
-        <button
-          type="button"
-          onClick={() => setSelectedStatus("REPROGRAMADA")}
-          disabled={pending}
-          className={`rounded-xl px-0 py-0 text-[11px] font-bold uppercase tracking-[0.18em] transition disabled:opacity-45 ${TONE_STYLES.warning.trigger}`}
-        >
-          Reprogramar
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedStatus("CANCELADA")}
-          disabled={pending}
-          className={`rounded-xl px-0 py-0 text-[11px] font-bold uppercase tracking-[0.18em] transition disabled:opacity-45 ${TONE_STYLES.danger.trigger}`}
-        >
-          Cancelar
-        </button>
+        <div ref={menuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((current) => !current)}
+            disabled={pending}
+            aria-label="Más acciones"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/35 bg-surface text-on-surface-variant transition hover:bg-surface-container-high disabled:opacity-45"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+
+          {menuOpen ? (
+            <div className="absolute right-0 top-11 z-20 min-w-[180px] rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-2 shadow-[0_20px_40px_rgba(6,27,14,0.12)]">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedStatus("REPROGRAMADA");
+                  setMenuOpen(false);
+                }}
+                disabled={pending}
+                className="flex w-full items-center rounded-xl px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f5a16] transition hover:bg-[#fde9cf] disabled:opacity-45"
+              >
+                Reprogramar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedStatus("CANCELADA");
+                  setMenuOpen(false);
+                }}
+                disabled={pending}
+                className="mt-1 flex w-full items-center rounded-xl px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-danger transition hover:bg-[#ffdad6] disabled:opacity-45"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <ConfirmationModal

@@ -1,10 +1,9 @@
 import {
   DashboardShell,
   PageActions,
-  SectionFrame,
 } from "@/components/editorial";
 import { HistoricalSyncPanel } from "@/components/historical-sync-panel";
-import { MigrationClassRow } from "@/components/migration-class-row";
+import { MigrationHistoryTable } from "@/components/migration-history-table";
 import {
   getClasesPorPeriodo,
   getGoogleSyncUrl,
@@ -13,10 +12,6 @@ import {
 } from "@/lib/backend";
 
 export const dynamic = "force-dynamic";
-
-function getTitleGroupKey(title: string) {
-  return title.trim().toLowerCase();
-}
 
 export default async function MigrationPage() {
   const today = new Date();
@@ -38,15 +33,6 @@ export default async function MigrationPage() {
     month: "long",
     year: "numeric",
   }).format(today);
-  const sameTitleIdsByKey = new Map<string, number[]>();
-
-  migrationClasses.forEach((clase) => {
-    const key = getTitleGroupKey(clase.titulo);
-    const group = sameTitleIdsByKey.get(key) ?? [];
-    group.push(clase.id);
-    sameTitleIdsByKey.set(key, group);
-  });
-
   const syncUrl = getGoogleSyncUrl(
     `${from}T00:00:00-03:00`,
     `${to}T23:59:59-03:00`,
@@ -55,7 +41,7 @@ export default async function MigrationPage() {
   return (
     <DashboardShell
       active="migration"
-      title="Migración"
+      title="Historial"
       actions={<PageActions />}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -64,11 +50,10 @@ export default async function MigrationPage() {
             Carga histórica
           </p>
           <h2 className="mt-3 font-headline text-5xl font-bold tracking-tight text-primary">
-            Migración de {monthLabelEs}
+            Historial de {monthLabelEs}
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-on-surface-variant">
-            Revisá el mes seleccionado, sincronizá el rango del calendario y
-            clasificá cada clase con el mismo flujo de cursos usados en Bandeja.
+            Revisá el mes seleccionado, sincronizá el rango del calendario y corregí estados o clasificaciones sobre la base histórica.
           </p>
         </div>
       </div>
@@ -77,40 +62,10 @@ export default async function MigrationPage() {
         <HistoricalSyncPanel rangeLabel={`${from} a ${to}`} syncUrl={syncUrl} />
       </div>
 
-      <SectionFrame className="mt-6 bg-surface-container-lowest p-0">
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse">
-            <thead className="bg-surface-container-high/60 text-left">
-              <tr>
-                {["Fecha", "Clase", "Consultora", "Estado", "Acciones"].map((label) => (
-                  <th
-                    key={label}
-                    className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant"
-                  >
-                    {label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/15">
-              {migrationClasses.map((clase) => (
-                <MigrationClassRow
-                  key={clase.id}
-                  clase={clase}
-                  consultoras={activeConsultoras}
-                  sameTitleIds={sameTitleIdsByKey.get(getTitleGroupKey(clase.titulo)) ?? []}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {migrationClasses.length === 0 ? (
-          <div className="px-6 py-8 text-sm text-on-surface-variant">
-            No se encontraron clases para este período de migración.
-          </div>
-        ) : null}
-      </SectionFrame>
+      <MigrationHistoryTable
+        classes={migrationClasses}
+        consultoras={activeConsultoras}
+      />
     </DashboardShell>
   );
 }

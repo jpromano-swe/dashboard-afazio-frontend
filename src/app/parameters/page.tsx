@@ -58,8 +58,7 @@ export default async function ParametersPage() {
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
         <SectionFrame className="bg-surface-container-lowest">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="max-w-2xl">
+          <div className="max-w-2xl">
               <StatusBadge tone="archived">Consultoras</StatusBadge>
               <h2 className="mt-5 font-headline text-5xl font-bold tracking-tight text-primary">
                 Gestionar consultoras y cursos
@@ -68,18 +67,6 @@ export default async function ParametersPage() {
                 Esta sección centraliza la configuración de consultoras y te muestra
                 en vivo el catálogo de cursos de cada una.
               </p>
-            </div>
-
-            <div className="grid min-w-[220px] gap-3 sm:text-right">
-              <div className="rounded-[1.2rem] bg-surface-container-low px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70">
-                  Total de registros
-                </p>
-                <p className="mt-2 font-headline text-4xl font-bold text-primary">
-                  {consultoras.length}
-                </p>
-              </div>
-            </div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -132,13 +119,17 @@ export default async function ParametersPage() {
       <section className="mt-12">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-              <h3 className="font-headline text-4xl font-bold text-primary">
+            <h3 className="font-headline text-4xl font-bold text-primary">
               Registro de consultoras
             </h3>
             <p className="mt-2 text-sm text-on-surface-variant">
               Resumen de cada consultora con sus respectivos cursos
             </p>
           </div>
+        </div>
+
+        <div className="mt-6 rounded-[1.2rem] border border-outline-variant/18 bg-surface-container-low px-5 py-4 text-sm leading-6 text-on-surface-variant">
+          Los cursos se administran desde esta sección y después quedan disponibles para clasificar clases pendientes e históricas.
         </div>
 
         {consultoras.length > 0 ? (
@@ -196,39 +187,72 @@ export default async function ParametersPage() {
                           ? `${cursos.length} curso${cursos.length === 1 ? "" : "s"} registrado${cursos.length === 1 ? "" : "s"}`
                           : "Todavía no hay cursos registrados"}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-                        Revisá el catálogo activo de cursos de {consultora.nombre}. La
-                        creación de cursos ahora se maneja desde las clases pendientes
-                        cuando no existe una coincidencia.
-                      </p>
                     </div>
                     <CalendarRange className="hidden h-6 w-6 text-on-surface-variant/60 sm:block" />
                   </div>
 
                   {cursos.length > 0 ? (
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                      {cursos.map((curso) => (
+                    <div className="mt-5 space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {cursos.slice(0, 4).map((curso) => (
+                          <div
+                            key={curso.id}
+                            className="group/course relative rounded-xl bg-surface px-4 py-3 pr-24"
+                          >
+                            <CourseCardActions
+                              curso={curso}
+                              consultoras={consultoras}
+                              backendUnavailable={backendUnavailable}
+                            />
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                              Curso #{curso.id}
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-primary">
+                              {curso.empresa}
+                              {curso.grupo ? ` - ${curso.grupo}` : ""}
+                            </p>
+                            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
+                              {curso.activa ? "Activa" : "Inactiva"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {cursos.length > 4 ? (
                         <div
-                          key={curso.id}
-                          className="relative rounded-xl bg-surface px-4 py-3 pr-24"
+                          className="rounded-xl border border-outline-variant/18 bg-surface px-4 py-3"
                         >
-                          <CourseCardActions
-                            curso={curso}
-                            consultoras={consultoras}
-                            backendUnavailable={backendUnavailable}
-                          />
-                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
-                            Curso #{curso.id}
-                          </p>
-                          <p className="mt-2 text-sm font-semibold text-primary">
-                            {curso.empresa}
-                            {curso.grupo ? ` - ${curso.grupo}` : ""}
-                          </p>
-                          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
-                            {curso.activa ? "Activa" : "Inactiva"}
-                          </p>
+                          <details>
+                            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                              Ver los {cursos.length} cursos
+                            </summary>
+                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                              {cursos.slice(4).map((curso) => (
+                                <div
+                                  key={curso.id}
+                                  className="group/course relative rounded-xl bg-surface-container-low px-4 py-3 pr-24"
+                                >
+                                  <CourseCardActions
+                                    curso={curso}
+                                    consultoras={consultoras}
+                                    backendUnavailable={backendUnavailable}
+                                  />
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                                    Curso #{curso.id}
+                                  </p>
+                                  <p className="mt-2 text-sm font-semibold text-primary">
+                                    {curso.empresa}
+                                    {curso.grupo ? ` - ${curso.grupo}` : ""}
+                                  </p>
+                                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
+                                    {curso.activa ? "Activa" : "Inactiva"}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
                         </div>
-                      ))}
+                      ) : null}
                     </div>
                   ) : (
                     <div className="mt-5 rounded-xl bg-surface px-4 py-3">

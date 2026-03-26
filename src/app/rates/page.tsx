@@ -5,7 +5,7 @@ import {
   SectionFrame,
   StatusBadge,
 } from "@/components/editorial";
-import { RateCreateForm } from "@/components/rate-create-form";
+import { RateCreateModal } from "@/components/rate-create-modal";
 import { getConsultoras, isRealConsultora } from "@/lib/backend";
 import { getRatesData } from "@/lib/api";
 
@@ -37,30 +37,8 @@ export default async function RatesPage() {
             </p>
           ) : null}
         </div>
-
+        <RateCreateModal activeConsultoras={activeConsultoras} />
       </div>
-
-      <section id="create-rate-form" className="mb-8">
-        <SectionFrame className="bg-surface-container-lowest">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
-                Tarifa
-              </p>
-              <h3 className="mt-2 font-headline text-3xl font-bold text-primary">
-                Tarifa
-              </h3>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-on-surface-variant">
-                {activeConsultoras.length > 0
-                  ? "Agregar o actualizar una tarifa de una consultora."
-                  : "La búsqueda de consultoras no está disponible en esta solicitud, así que este formulario vuelve a la entrada manual de `consultoraId`."}
-              </p>
-            </div>
-          </div>
-
-          <RateCreateForm activeConsultoras={activeConsultoras} />
-        </SectionFrame>
-      </section>
 
       <div className="grid gap-8 lg:grid-cols-2">
         {data.cards.map((card, index) => (
@@ -104,11 +82,8 @@ export default async function RatesPage() {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">
                   Tarifa horaria actual
                 </p>
-                <p className="mt-3 inline-flex flex-wrap items-baseline gap-x-1 whitespace-nowrap font-headline text-[2.5rem] font-bold leading-none tracking-tight text-primary">
-                  <span className="whitespace-nowrap">{card.currentRate}</span>
-                  <span className="font-sans text-xs font-medium text-on-surface-variant">
-                    por hora
-                  </span>
+                <p className="mt-3 font-sans text-[2.2rem] font-black leading-none tracking-[-0.05em] text-primary">
+                  {card.currentRate}
                 </p>
               </div>
               <div className="sm:text-right">
@@ -126,7 +101,7 @@ export default async function RatesPage() {
                 Historial de tarifas
               </p>
               <div className="mt-4 space-y-4">
-                {card.history.map((entry) => (
+                {card.history.slice(0, 2).map((entry) => (
                   <div
                     key={`${entry.value}-${entry.range}`}
                     className="flex flex-col gap-2 text-sm text-on-surface-variant sm:flex-row sm:items-center sm:justify-between"
@@ -142,6 +117,31 @@ export default async function RatesPage() {
                     <p>{entry.range}</p>
                   </div>
                 ))}
+                {card.history.length > 2 ? (
+                  <details className="rounded-2xl border border-outline-variant/15 bg-surface-container-low px-4 py-3">
+                    <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                      Ver historial completo
+                    </summary>
+                    <div className="mt-4 space-y-4">
+                      {card.history.slice(2).map((entry) => (
+                        <div
+                          key={`${entry.value}-${entry.range}`}
+                          className="flex flex-col gap-2 text-sm text-on-surface-variant sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <p>
+                            <span className="font-headline text-xl text-primary">
+                              {entry.value}
+                            </span>
+                            <span className="ml-2 text-[11px] uppercase tracking-[0.14em]">
+                              {entry.note}
+                            </span>
+                          </p>
+                          <p>{entry.range}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ) : null}
               </div>
             </div>
           </SectionFrame>
@@ -149,7 +149,7 @@ export default async function RatesPage() {
 
       </div>
 
-      <div className="mt-12 flex flex-col gap-6 border-t border-outline-variant/20 pt-8 text-sm text-on-surface-variant md:flex-row md:items-center md:justify-between">
+      <div className="sticky bottom-6 mt-12 flex flex-col gap-6 rounded-[1.35rem] border border-outline-variant/20 bg-surface-container-lowest/88 px-6 py-5 text-sm text-on-surface-variant shadow-[0_18px_40px_rgba(6,27,14,0.08)] backdrop-blur md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap gap-8">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em]">
@@ -168,7 +168,7 @@ export default async function RatesPage() {
             </p>
           </div>
         </div>
-        <p className="text-[11px] uppercase tracking-[0.18em]">{data.syncNote}</p>
+        <p className="max-w-md text-[11px] uppercase tracking-[0.18em]">{data.syncNote}</p>
       </div>
     </DashboardShell>
   );

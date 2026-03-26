@@ -116,3 +116,15 @@ select:focus-visible {
 .text-balance {
   text-wrap: balance;
 }
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

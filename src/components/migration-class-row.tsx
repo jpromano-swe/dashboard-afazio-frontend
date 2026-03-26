@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, Pencil } from "lucide-react";
+import { CheckCheck, LoaderCircle, Pencil } from "lucide-react";
 import {
   assignExistingCourseAction,
   assignExistingCourseSeriesAction,
+  markClassAsTaughtAction,
+  updateClassStatusAction,
 } from "@/app/actions";
-import { ScheduleStatusActions } from "@/components/dashboard-class-actions";
 import { StatusBadge } from "@/components/editorial";
 import {
   findConsultoraIdByName,
@@ -177,7 +178,33 @@ export function MigrationClassRow({
 
   const [isEditing, setIsEditing] = useState(isUnclassified);
   const [savingMode, setSavingMode] = useState<"series" | null>(null);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
   const canAssignExisting = Boolean(consultoraId) && Boolean(selectedCourseId);
+
+  async function updateInlineStatus(nextStatus: "DICTADA" | "CANCELADA" | "REPROGRAMADA") {
+    setStatusUpdating(true);
+
+    try {
+      const formData = new FormData();
+      formData.set("classId", String(clase.id));
+
+      if (nextStatus === "DICTADA") {
+        await markClassAsTaughtAction(formData);
+      } else {
+        formData.set("estado", nextStatus);
+        await updateClassStatusAction(formData);
+      }
+
+      notifySuccess("Estado actualizado", `La clase quedó marcada como ${nextStatus.toLowerCase()}.`);
+      setStatusMenuOpen(false);
+      router.refresh();
+    } catch (error) {
+      notifyError(error, "No se pudo actualizar el estado.");
+    } finally {
+      setStatusUpdating(false);
+    }
+  }
 
   async function saveClassification(mode: "series") {
     if (!clase.id || !consultoraId || !selectedCourseId) {
@@ -400,30 +427,68 @@ export function MigrationClassRow({
         )}
       </td>
       <td className="px-6 py-5">
-        <StatusBadge
-          tone={
-            isUnclassified
-              ? "review"
-              : clase.estado === "DICTADA"
-                ? "billable"
-                : clase.estado === "CANCELADA"
-                  ? "danger"
-                  : clase.estado === "REPROGRAMADA"
-                    ? "review"
-                    : "confirmed"
-          }
-        >
+        {clase.estado === "PROGRAMADA" ? (
+          <div className="relative inline-flex">
+            <button
+              type="button"
+              onClick={() => setStatusMenuOpen((value) => !value)}
+              className="rounded-full"
+              disabled={statusUpdating}
+            >
+              <StatusBadge tone={isUnclassified ? "review" : "confirmed"}>
+                {statusUpdating ? "Actualizando..." : isUnclassified ? "Sin clasificar" : "Programada"}
+              </StatusBadge>
+            </button>
+
+            {statusMenuOpen ? (
+              <div className="absolute left-0 top-[calc(100%+0.5rem)] z-10 min-w-48 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-2 shadow-[0_20px_40px_rgba(6,27,14,0.12)]">
+                <button
+                  type="button"
+                  onClick={() => updateInlineStatus("DICTADA")}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-primary transition hover:bg-surface-container-high"
+                >
+                  <CheckCheck className="h-4 w-4" />
+                  Marcar como dictada
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateInlineStatus("REPROGRAMADA")}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-primary transition hover:bg-surface-container-high"
+                >
+                  Reprogramar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateInlineStatus("CANCELADA")}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-danger transition hover:bg-danger/5"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <StatusBadge
+            tone={
+              isUnclassified
+                ? "review"
+                : clase.estado === "DICTADA"
+                  ? "billable"
+                  : clase.estado === "CANCELADA"
+                    ? "danger"
+                    : clase.estado === "REPROGRAMADA"
+                      ? "review"
+                      : "confirmed"
+            }
+          >
             {isUnclassified ? "Sin clasificar" : clase.estado}
-        </StatusBadge>
+          </StatusBadge>
+        )}
       </td>
       <td className="px-6 py-5 text-right">
-        {clase.estado === "PROGRAMADA" ? (
-          <ScheduleStatusActions classId={clase.id} classTitle={clase.titulo} />
-        ) : (
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/60">
-            {clase.estado}
-          </span>
-        )}
+        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/60">
+          {clase.estado === "PROGRAMADA" ? "Tocá el estado para editar" : clase.estado}
+        </span>
       </td>
     </tr>
   );

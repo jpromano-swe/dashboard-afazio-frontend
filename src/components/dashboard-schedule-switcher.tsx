@@ -17,6 +17,40 @@ type DashboardScheduleSwitcherProps = {
   weeklySchedule: WeeklyScheduleDay[];
 };
 
+function getConsultoraTone(consultoraName: string | null | undefined) {
+  const normalized = (consultoraName ?? "").trim().toLowerCase();
+
+  if (normalized.includes("haskler")) {
+    return {
+      row: "bg-[#efe5ff] hover:bg-[#e6d9ff]",
+      card: "bg-[#f3ecff] border-[#dfcff8]",
+      join: "border-[#37295f] bg-[#37295f] text-[#f7f2ff] hover:bg-[#2f234f]",
+    };
+  }
+
+  if (normalized.includes("blc")) {
+    return {
+      row: "bg-[#f8efc8] hover:bg-[#f2e4b0]",
+      card: "bg-[#fbf3d8] border-[#e9d79c]",
+      join: "border-[#3c3421] bg-[#3c3421] text-[#fff9eb] hover:bg-[#2f2918]",
+    };
+  }
+
+  if (normalized.includes("independ")) {
+    return {
+      row: "bg-[#f7ddd5] hover:bg-[#efcfc5]",
+      card: "bg-[#fae6e0] border-[#ebc6bc]",
+      join: "border-[#4a2f2a] bg-[#4a2f2a] text-[#fff3f0] hover:bg-[#3a2521]",
+    };
+  }
+
+  return {
+    row: "hover:bg-surface-container-low/55",
+    card: "bg-surface-container-low border-outline-variant/15",
+    join: "border-[#203128] bg-[#203128] text-[#f5f3ed] hover:bg-[#17241d]",
+  };
+}
+
 function getBadgeLabel(entry: ScheduleEntry) {
   if (entry.classState === "PROGRAMADA") {
     return "Programada";
@@ -192,9 +226,13 @@ export function DashboardScheduleSwitcher({
                 </thead>
                 <tbody className="divide-y divide-outline-variant/15">
                   {todaySchedule.map((entry) => (
+                    (() => {
+                      const tone = getConsultoraTone(entry.consultantName);
+
+                      return (
                     <tr
                       key={entry.id ?? entry.googleEventId ?? `${entry.title}-${entry.time}`}
-                      className="hover:bg-surface-container-low/55"
+                      className={tone.row}
                     >
                       <td className="px-6 py-5">
                         <div className={entry.muted ? "opacity-55" : undefined}>
@@ -207,7 +245,7 @@ export function DashboardScheduleSwitcher({
                               href={entry.meetingUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="mt-2 inline-flex items-center rounded-full border border-outline-variant/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary transition hover:bg-surface-container-high"
+                              className={`mt-3 inline-flex items-center rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] transition ${tone.join}`}
                             >
                               Unirse
                             </a>
@@ -231,6 +269,8 @@ export function DashboardScheduleSwitcher({
                         </div>
                       </td>
                     </tr>
+                      );
+                    })()
                   ))}
                 </tbody>
               </table>
@@ -278,9 +318,13 @@ export function DashboardScheduleSwitcher({
                     <div className="mt-4 space-y-3">
                       {day.entries.length > 0 ? (
                         day.entries.map((entry) => (
+                          (() => {
+                            const tone = getConsultoraTone(entry.consultantName);
+
+                            return (
                           <div
                             key={entry.id ?? entry.googleEventId ?? `${entry.title}-${entry.time}`}
-                            className="rounded-2xl border border-outline-variant/15 bg-surface-container-low px-3 py-3"
+                            className={`rounded-2xl border px-3 py-3 ${tone.card}`}
                           >
                             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/70">
                               {entry.time}
@@ -292,7 +336,7 @@ export function DashboardScheduleSwitcher({
                                 href={entry.meetingUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-2 inline-flex items-center rounded-full border border-outline-variant/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary transition hover:bg-surface-container-high"
+                                className={`mt-3 inline-flex items-center rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] transition ${tone.join}`}
                               >
                                 Unirse
                               </a>
@@ -301,6 +345,8 @@ export function DashboardScheduleSwitcher({
                               <StatusBadge tone={entry.status}>{getBadgeLabel(entry)}</StatusBadge>
                             </div>
                           </div>
+                            );
+                          })()
                         ))
                       ) : (
                         <div className="rounded-2xl border border-dashed border-outline-variant/20 px-3 py-6 text-sm text-on-surface-variant">

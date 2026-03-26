@@ -135,9 +135,10 @@ export function ParametersManagementPanel({
           type="button"
           onClick={() => setOpenConsultora(true)}
           disabled={backendUnavailable}
-          className="group flex min-h-[160px] w-full flex-col justify-between rounded-[1.4rem] border border-outline-variant/20 bg-surface-container-low px-6 py-6 text-left transition hover:-translate-y-0.5 hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-55"
+          className="group flex min-h-[170px] w-full flex-col justify-between rounded-[1.4rem] border-2 border-dashed border-outline-variant/35 bg-surface-container-low px-6 py-6 text-left transition hover:-translate-y-0.5 hover:border-primary/35 hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-55"
         >
-          <div>
+          <div className="flex items-start justify-between gap-4">
+            <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant/70">
               Agregar consultora
             </p>
@@ -147,6 +148,10 @@ export function ParametersManagementPanel({
             <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
               Creá una nueva consultora con su indicador de reporte y notas descriptivas.
             </p>
+            </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface text-primary transition group-hover:bg-primary group-hover:text-on-primary">
+              <CirclePlus className="h-5 w-5" />
+            </div>
           </div>
         </button>
 
@@ -154,9 +159,10 @@ export function ParametersManagementPanel({
           type="button"
           onClick={() => setOpenCourse(true)}
           disabled={backendUnavailable}
-          className="group flex min-h-[160px] w-full flex-col justify-between rounded-[1.4rem] border border-outline-variant/20 bg-surface-container-low px-6 py-6 text-left transition hover:-translate-y-0.5 hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-55"
+          className="group flex min-h-[170px] w-full flex-col justify-between rounded-[1.4rem] border-2 border-dashed border-outline-variant/35 bg-surface-container-low px-6 py-6 text-left transition hover:-translate-y-0.5 hover:border-primary/35 hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-55"
         >
-          <div>
+          <div className="flex items-start justify-between gap-4">
+            <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant/70">
               Agregar curso
             </p>
@@ -166,6 +172,10 @@ export function ParametersManagementPanel({
             <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
               Elegí una consultora existente y luego agregá un curso con empresa y grupo.
             </p>
+            </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface text-primary transition group-hover:bg-primary group-hover:text-on-primary">
+              <Building2 className="h-5 w-5" />
+            </div>
           </div>
         </button>
       </div>

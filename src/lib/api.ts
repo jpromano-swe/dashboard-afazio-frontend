@@ -293,6 +293,7 @@ function mapClaseToScheduleEntry(clase: ClaseDelDiaResponse) {
     googleEventId: clase.googleEventId,
     meetingUrl: clase.meetingUrl,
     classState: clase.estado,
+    consultantName: normalizeConsultoraName(clase.consultoraNombre),
     title: clase.titulo,
     subtitle: clase.meetingUrl
       ? [assignmentLabel, "Reunión lista"].filter(Boolean).join(" · ")
@@ -547,6 +548,7 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
 
 export async function getInboxData(): Promise<InboxData> {
   return withFallback("inbox", inboxData, async () => {
+    const todayIso = toIsoDate(toTimeZoneCalendarDate());
     const [rawSessions, consultoras] = await Promise.all([
       getClasesPendientesClasificacion(),
       getConsultoras().catch(() => []),
@@ -561,9 +563,40 @@ export async function getInboxData(): Promise<InboxData> {
         !session.consultoraNombre ||
         isPendingClassification(session.sinClasificar, session.consultoraNombre),
     ).length;
+    const currentRates = await Promise.all(
+      realConsultoras.map(async (consultora) => {
+        const currentRate = await getTarifaVigente(consultora.id, todayIso).catch(() => null);
+
+        if (currentRate) {
+          return currentRate;
+        }
+
+        const history = await getTarifasConsultora(consultora.id).catch(() => []);
+        const sortedHistory = [...history].sort((left, right) =>
+          right.vigenteDesde.localeCompare(left.vigenteDesde),
+        );
+
+        return sortedHistory[0] ?? null;
+      }),
+    );
+    const availableRates = currentRates.filter(
+      (rate): rate is NonNullable<typeof rate> => rate !== null,
+    );
+    const averageRate =
+      availableRates.length > 0
+        ? sumBy(availableRates, (rate) => rate.montoPorHora) / availableRates.length
+        : null;
+    const estimatedValue =
+      averageRate !== null
+        ? formatCurrency(
+            (totalMinutes / 60) * averageRate,
+            availableRates[0]?.moneda ?? DEFAULT_CURRENCY,
+          )
+        : "ARS --";
 
     return {
       ...inboxData,
+      title: "Pendientes",
       subtitle: `Se encontraron ${sessions.length} entr${
         sessions.length === 1 ? "ada" : "adas"
       } sin clasificar en tu calendario de Google.`,
@@ -593,16 +626,15 @@ export async function getInboxData(): Promise<InboxData> {
             : undefined,
       })),
       pendingHours: formatHours(totalMinutes),
-      estimatedValue: "ARS --",
+      estimatedValue,
       classificationTip:
         missingConsultora > 0
-          ? `Por ${missingConsultora} sesión${missingConsultora > 1 ? "es" : ""} importada${
+          ? `Tenés ${missingConsultora} ${missingConsultora > 1 ? "sesiones" : "sesión"} importada${
               missingConsultora > 1 ? "s" : ""
-            } todavía ${missingConsultora > 1 ? "carecen" : "carece"} asignación de consultora. Elegí una consultora primero y luego vinculá la fila a un curso existente.`
+            } sin consultora asignada. Elegí una consultora y vinculala a un curso existente para actualizar el registro.`
           : "Elegí una consultora y luego asigná un curso existente antes de confirmar.",
       conflicts: buildInboxConflicts(sessions),
-      backendNotice:
-        "El valor facturable estimado se omite a propósito mientras la clasificación por curso y la semántica de tarifas se terminan de estabilizar en el backend.",
+      backendNotice: undefined,
     };
   });
 }
@@ -653,7 +685,7 @@ export async function getRatesData(date = new Date()): Promise<RatesData> {
 
         return {
           name: seed.nombre,
-          subtitle: seed.descripcion ?? "Consultora precargada del front",
+          subtitle: seed.descripcion ?? "Consultora activa",
           status:
             activeRate && isRateActive(activeRate, todayIso)
               ? ("Activa" as const)
@@ -697,13 +729,13 @@ export async function getRatesData(date = new Date()): Promise<RatesData> {
       cards,
       averageRate:
         averageRate > 0
-          ? `${formatCurrency(averageRate, currentValues[0]?.moneda ?? DEFAULT_CURRENCY)} / h`
+          ? formatCurrency(averageRate, currentValues[0]?.moneda ?? DEFAULT_CURRENCY)
           : ratesData.averageRate,
-      billableUnits: `${cards.reduce((total, card) => total + card.history.length, 0)} filas de tarifa`,
-      syncNote: `Se cargaron ${cards.length} libro${cards.length > 1 ? "s" : ""} de consultora desde los endpoints estables de tarifas.`,
+      billableUnits: `${cards.reduce((total, card) => total + card.history.length, 0)} registros de tarifa`,
+      syncNote: `${cards.length} consultora${cards.length > 1 ? "s" : ""} con historial de tarifas visible.`,
       backendNotice: liveConsultoras.length > 0
         ? "Definí la tarifa de las clases para cada consultora."
-        : "La lista de consultoras usó seeds del frontend porque /api/consultoras no estuvo disponible durante esta solicitud.",
+        : "La lista de consultoras se está mostrando con datos de respaldo porque `/api/consultoras` no respondió en esta solicitud.",
     };
   });
 }

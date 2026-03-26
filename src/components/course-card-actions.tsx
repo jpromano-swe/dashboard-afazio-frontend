@@ -108,7 +108,7 @@ export function CourseCardActions({
         <button
           type="button"
           onClick={() => setOpenEdit(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/25 bg-surface/80 text-on-surface-variant/55 opacity-35 transition hover:bg-surface-container-high hover:text-primary hover:opacity-100 group-hover/course:opacity-100 group-hover/course:text-on-surface-variant"
           aria-label={`Editar curso ${curso.id}`}
         >
           <Pencil className="h-4 w-4" />
@@ -122,7 +122,7 @@ export function CourseCardActions({
               "El backend aún no expone DELETE /api/cursos/{id}.",
             );
           }}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-[#ffe5e5] hover:text-[#b42318]"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/25 bg-surface/80 text-on-surface-variant/55 opacity-35 transition hover:bg-[#ffe5e5] hover:text-[#b42318] hover:opacity-100 group-hover/course:opacity-100 group-hover/course:text-on-surface-variant"
           aria-label={`Eliminar curso ${curso.id}`}
         >
           <Trash2 className="h-4 w-4" />

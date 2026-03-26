@@ -29,7 +29,7 @@ type PendingClassificationTableProps = {
 };
 
 export const PENDING_CLASSIFICATION_COLUMNS =
-  "minmax(220px, 1.05fr) minmax(150px, 0.78fr) minmax(76px, 0.38fr) minmax(170px, 0.76fr) minmax(300px, 1.32fr)";
+  "minmax(210px, 1fr) minmax(140px, 0.7fr) minmax(72px, 0.34fr) minmax(160px, 0.72fr) minmax(220px, 0.92fr)";
 
 function getCourseLabel(course: CursoResponse) {
   return course.grupo ? `${course.empresa} - ${course.grupo}` : course.empresa;
@@ -204,7 +204,7 @@ function PendingClassificationRow({
   const hasClassId = Boolean(session.id);
   const canAssignExisting = hasClassId && Boolean(consultoraId) && Boolean(selectedCourseId);
   const canExclude = hasClassId && Boolean(consultoraId);
-  const [isEditing, setIsEditing] = useState(!session.cursoId);
+  const [isEditing, setIsEditing] = useState(false);
   const [savingMode, setSavingMode] = useState<"series" | "exclude" | null>(null);
 
   async function saveClassification(mode: "series" | "exclude") {
@@ -286,10 +286,10 @@ function PendingClassificationRow({
           <MoreHorizontal className="h-4 w-4" />
         </div>
         <div className="min-w-0">
-          <p className="max-w-[16ch] text-balance text-[clamp(1.02rem,1.35vw,1.18rem)] font-medium leading-tight text-primary">
+          <p className="max-w-[14ch] text-balance text-[clamp(1rem,1.2vw,1.15rem)] font-medium leading-tight text-primary">
             {session.title}
           </p>
-          <p className="mt-1 max-w-[18ch] text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">
+          <p className="mt-1 max-w-[14ch] text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">
             {session.company}
           </p>
         </div>
@@ -301,7 +301,7 @@ function PendingClassificationRow({
       <div className="pt-1 text-sm text-on-surface-variant">{session.duration}</div>
 
       <div className="min-w-0 pt-1">
-        <p className="max-w-[15ch] text-sm font-medium leading-6 text-primary">
+        <p className="max-w-[14ch] text-sm font-medium leading-6 text-primary">
           {session.client}
         </p>
         <p
@@ -323,9 +323,9 @@ function PendingClassificationRow({
           <div className="rounded-xl border border-outline-variant/25 bg-surface-container-low p-2.5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
-                {selectedCourse ? "Editar asignación" : "Asignar curso"}
+                {selectedCourse ? "Editar asignación" : "Clasificar"}
               </p>
-              {selectedCourse ? (
+              {selectedCourse || consultoraId ? (
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
@@ -426,29 +426,52 @@ function PendingClassificationRow({
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-outline-variant/25 bg-secondary-container/50 px-3 py-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-secondary-container/80">
-                  Curso asignado
-                </p>
-                <p className="mt-1 font-medium text-primary">{persistedCourseLabel}</p>
-                <p className="mt-1 text-[11px] text-on-surface-variant">
-                  {selectedCourse
-                    ? `Consultora: ${selectedCourse.consultoraNombre}`
-                    : "Clasificación guardada"}
-              </p>
+          <>
+            {selectedCourseId || session.cursoId ? (
+              <div className="rounded-xl border border-outline-variant/25 bg-secondary-container/50 px-3 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-secondary-container/80">
+                      Curso asignado
+                    </p>
+                    <p className="mt-1 text-sm font-medium leading-5 text-primary">
+                      {persistedCourseLabel}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">
+                      {selectedCourse
+                        ? `Consultora: ${selectedCourse.consultoraNombre}`
+                        : "Clasificación guardada"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary"
+                    aria-label="Editar clasificación"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary"
-                aria-label="Editar clasificación"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+            ) : (
+              <div className="rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
+                  Pendiente de asignación
+                </p>
+                <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">
+                  Elegí una consultora y un curso existente para clasificar esta fila.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-on-primary transition hover:opacity-95"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Clasificar
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

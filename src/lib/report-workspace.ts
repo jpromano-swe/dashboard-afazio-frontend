@@ -79,11 +79,13 @@ function formatShortDate(dateInput: string | Date) {
 }
 
 function formatMonthYear(dateInput: string | Date) {
-  return new Intl.DateTimeFormat("es-AR", {
+  const formatted = new Intl.DateTimeFormat("es-AR", {
     timeZone: DEFAULT_TIME_ZONE,
     month: "long",
     year: "numeric",
   }).format(new Date(dateInput));
+
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 function formatTime(dateInput: string | Date) {

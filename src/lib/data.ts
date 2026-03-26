@@ -13,6 +13,7 @@ export type ScheduleEntry = {
   googleEventId?: string | null;
   meetingUrl?: string | null;
   classState?: ClaseEstado;
+  consultantName?: string | null;
   title: string;
   subtitle: string;
   time: string;
@@ -232,7 +233,7 @@ export const dashboardData: DashboardData = {
 };
 
 export const inboxData: InboxData = {
-  title: "Clases sin clasificar",
+  title: "Pendientes",
   subtitle: "Se encontraron 12 clases sin clasificar desde tu calendario de Google.",
   sessions: [
     {
@@ -321,9 +322,9 @@ export const ratesData: RatesData = {
       history: [{ value: "$130.00", note: "Histórica", range: "Ago 2021 — Feb 2023" }],
     },
   ],
-  averageRate: "$180.00 / h",
+  averageRate: "$180.00",
   billableUnits: "124 h esta semana",
-  syncNote: "Última sincronización del libro: 24 oct 2024 a las 09:15",
+  syncNote: "Última actualización: 24 oct 2024 a las 09:15",
 };
 
 export const incomeData: IncomeData = {

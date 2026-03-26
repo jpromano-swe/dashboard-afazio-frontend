@@ -100,10 +100,10 @@ const navItems: Array<{
   icon: ComponentType<{ className?: string }>;
 }> = [
   { id: "dashboard", href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
-  { id: "inbox", href: "/inbox", label: "Bandeja", icon: Mail },
+  { id: "inbox", href: "/inbox", label: "Pendientes", icon: Mail },
   { id: "rates", href: "/rates", label: "Tarifas", icon: BadgeDollarSign },
   { id: "income", href: "/income", label: "Ingresos", icon: Wallet },
-  { id: "migration", href: "/migration", label: "Migración", icon: History },
+  { id: "migration", href: "/migration", label: "Historial", icon: History },
   { id: "reports", href: "/reports", label: "Reportes", icon: BarChart3 },
   { id: "parameters", href: "/parameters", label: "Consultoras", icon: Settings2 },
 ];
@@ -226,8 +226,8 @@ export function PageActions() {
     <>
       <ActionButton
         href={connectHref}
-        variant="primary"
-        className="bg-[#4f7f5f] text-white hover:bg-[#446f52]"
+        variant="outline"
+        className="border-[#4f7f5f]/30 bg-surface-container-lowest text-[#3f6a4d] hover:bg-[#eef5ee] hover:text-[#31543d]"
         icon={<CalendarSync className="h-3.5 w-3.5" />}
       >
         Conectar calendario
@@ -318,8 +318,8 @@ export function MetricCard({
       <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70">
         {label}
       </p>
-      <div className="mt-8 flex items-end justify-between gap-4">
-        <div>
+      <div className="mt-8 flex items-end justify-between gap-5">
+        <div className="min-w-0 flex-1">
           <div
             className={cn(
               "font-headline text-5xl font-bold tracking-tight text-primary",
@@ -334,7 +334,7 @@ export function MetricCard({
         </div>
         <div
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-container-high text-primary/60",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface-container-high text-primary/60",
             accent === "amber" && "bg-[#fde9cf] text-[#ad6e24]",
           )}
         >
@@ -383,9 +383,9 @@ export function StatusBadge({
   className,
 }: StatusBadgeProps) {
   const tones = {
-    confirmed: "bg-secondary text-on-secondary",
-    pending: "bg-tertiary-fixed-dim text-on-tertiary-fixed",
-    billable: "bg-surface-tint text-on-primary",
+    confirmed: "bg-[#bcdab8] text-[#15361a]",
+    pending: "bg-[#f6e1a9] text-[#7a5400]",
+    billable: "bg-[#d7e8ff] text-[#184c84]",
     archived: "bg-secondary-container text-on-secondary-container",
     review: "bg-[#fde9cf] text-[#8f5a16]",
     danger: "bg-[#ffdad6] text-[#8e1212]",

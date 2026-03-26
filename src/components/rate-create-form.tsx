@@ -9,6 +9,7 @@ import { notifyError, notifySuccess } from "@/lib/client-toast";
 
 type RateCreateFormProps = {
   activeConsultoras: ConsultoraResponse[];
+  onSuccess?: () => void;
 };
 
 const INITIAL_STATE: MutationActionState = {
@@ -16,7 +17,7 @@ const INITIAL_STATE: MutationActionState = {
   message: null,
 };
 
-export function RateCreateForm({ activeConsultoras }: RateCreateFormProps) {
+export function RateCreateForm({ activeConsultoras, onSuccess }: RateCreateFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(createRateAction, INITIAL_STATE);
 
@@ -24,13 +25,14 @@ export function RateCreateForm({ activeConsultoras }: RateCreateFormProps) {
     if (state.status === "success") {
       notifySuccess("Tarifa guardada", state.message);
       formRef.current?.reset();
+      onSuccess?.();
       return;
     }
 
     if (state.status === "error") {
       notifyError(state.message ?? "No se pudo crear la tarifa.");
     }
-  }, [state]);
+  }, [onSuccess, state]);
 
   return (
     <form ref={formRef} action={formAction} className="mt-6 grid gap-4 md:grid-cols-2">
@@ -153,7 +155,7 @@ export function RateCreateForm({ activeConsultoras }: RateCreateFormProps) {
         className="justify-center md:col-span-2"
         disabled={pending}
       >
-        {pending ? "Creando..." : "Crear tarifa"}
+        {pending ? "Guardando..." : "Guardar tarifa"}
       </ActionButton>
     </form>
   );

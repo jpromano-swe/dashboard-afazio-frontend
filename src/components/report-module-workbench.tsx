@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CalendarDays, Copy, Download, Mail, Send } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, Copy, Download, Mail, Send, X } from "lucide-react";
 import { ActionButton, SectionFrame, StatusBadge } from "@/components/editorial";
 import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
 import type { ReportTheme, ReportWorkspaceData } from "@/lib/report-workspace";
@@ -26,7 +26,7 @@ const THEME_STYLES: Record<
   }
 > = {
   amber: {
-    card: "bg-gradient-to-br from-[#fffbe4] via-[#f7efbb] to-[#eadb86]",
+    card: "bg-[#f4e3a1]",
     cardBorder: "border-[#e0cf79]",
     primaryButton: "bg-[#d8c35c] text-[#2f2500] hover:opacity-95",
     primaryBadge: "bg-[#fff4bf] text-[#6d5a00]",
@@ -36,7 +36,7 @@ const THEME_STYLES: Record<
     tableHead: "bg-[#fff7d0]/70",
   },
   purple: {
-    card: "bg-gradient-to-br from-[#f4f0ff] via-[#ddd4ff] to-[#c2b3f6]",
+    card: "bg-[#d9cff3]",
     cardBorder: "border-[#cbbef0]",
     primaryButton: "bg-[#cdbff3] text-[#3f2f85] hover:opacity-95",
     primaryBadge: "bg-[#ece5ff] text-[#5943a6]",
@@ -52,10 +52,29 @@ export function ReportModuleWorkbench({
   title,
   subtitle,
 }: ReportModuleWorkbenchProps) {
+  return (
+    <ReportModuleWorkbenchInner
+      key={`${data.moduleName}-${data.key}`}
+      data={data}
+      title={title}
+      subtitle={subtitle}
+    />
+  );
+}
+
+function ReportModuleWorkbenchInner({
+  data,
+  title,
+  subtitle,
+}: ReportModuleWorkbenchProps) {
   const theme = THEME_STYLES[data.theme];
   const [message, setMessage] = useState(data.emailBody);
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [excelPrepared, setExcelPrepared] = useState(false);
+  const [mailPanelMounted, setMailPanelMounted] = useState(false);
+  const [mailPanelVisible, setMailPanelVisible] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   const canGenerate = Boolean(data.excelHref) && data.rows.length > 0 && data.rows.length <= 9;
 
@@ -89,8 +108,47 @@ export function ReportModuleWorkbench({
     window.setTimeout(() => setSent(false), 2200);
   }
 
+  function handleGenerateExcel() {
+    if (!data.excelHref) {
+      return;
+    }
+
+    window.open(data.excelHref, "_blank", "noopener,noreferrer");
+    setExcelPrepared(true);
+    notifySuccess(
+      "Excel generado",
+      "El archivo se abrió en una nueva pestaña. Ya podés preparar el envío por correo.",
+    );
+  }
+
+  function openMailPanel() {
+    if (closeTimeoutRef.current) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+
+    setMailPanelMounted(true);
+    window.requestAnimationFrame(() => setMailPanelVisible(true));
+  }
+
+  function closeMailPanel() {
+    setMailPanelVisible(false);
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setMailPanelMounted(false);
+      closeTimeoutRef.current = null;
+    }, 280);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_380px]">
+    <>
       <SectionFrame className="p-0">
         <div className="border-b border-outline-variant/12 px-6 py-6 sm:px-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -173,32 +231,6 @@ export function ReportModuleWorkbench({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap items-center gap-3">
-            {canGenerate ? (
-              <ActionButton
-                href={data.excelHref!}
-                target="_blank"
-                rel="noreferrer"
-                variant="primary"
-                icon={<Download className="h-4 w-4" />}
-              >
-                Generar Excel
-              </ActionButton>
-            ) : (
-              <ActionButton
-                variant="primary"
-                icon={<Download className="h-4 w-4" />}
-                disabled
-              >
-                Generar Excel
-              </ActionButton>
-            )}
-
-            <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${theme.pill}`}>
-              Límite de plantilla: 9 filas
-            </span>
-          </div>
-
           <div className="rounded-[1.2rem] border border-outline-variant/15 bg-surface-container-lowest p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -212,6 +244,36 @@ export function ReportModuleWorkbench({
               <StatusBadge tone={data.rows.length > 9 ? "danger" : "confirmed"}>
                 {String(data.rows.length).padStart(2, "0")} filas
               </StatusBadge>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${theme.pill}`}>
+                Límite de plantilla: 9 filas
+              </span>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {excelPrepared ? (
+                  <ActionButton
+                    type="button"
+                    variant="outline"
+                    icon={<Mail className="h-4 w-4" />}
+                    onClick={openMailPanel}
+                    className="hover:-translate-y-0.5 hover:border-primary/35 hover:bg-surface-container-high"
+                  >
+                    Preparar envío por correo
+                  </ActionButton>
+                ) : null}
+
+                <ActionButton
+                  type="button"
+                  variant="primary"
+                  icon={<Download className="h-4 w-4" />}
+                  onClick={handleGenerateExcel}
+                  disabled={!canGenerate}
+                >
+                  Generar Excel
+                </ActionButton>
+              </div>
             </div>
 
             <div className="mt-5 overflow-x-auto">
@@ -259,83 +321,110 @@ export function ReportModuleWorkbench({
           </div>
         </div>
       </SectionFrame>
-
-      <SectionFrame className="space-y-6 bg-surface-container-lowest">
+      {mailPanelMounted ? (
         <div
-          className={`rounded-[1.5rem] border ${theme.cardBorder} ${theme.card} px-5 py-6 shadow-[0_18px_36px_rgba(0,0,0,0.09)]`}
+          className={`fixed inset-0 z-[1200] bg-black/30 backdrop-blur-[2px] transition-opacity duration-300 ${
+            mailPanelVisible ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={closeMailPanel}
         >
-          <p className={`text-[10px] font-bold uppercase tracking-[0.24em] ${theme.heroText} opacity-70`}>
-            Mensaje
-          </p>
-          <h3 className={`mt-3 font-headline text-4xl font-bold ${theme.heroText}`}>
-            Borrador de correo
-          </h3>
-          <p className={`mt-3 text-sm leading-6 ${theme.heroText} opacity-85`}>
-            Redactá el mensaje ahora y enviarlo como acción simulada hasta que el contrato de backend esté listo.
-          </p>
-        </div>
+          <div
+            className={`absolute inset-y-0 right-0 w-full max-w-[520px] overflow-y-auto border-l border-outline-variant/15 bg-surface-container-lowest shadow-[-24px_0_60px_rgba(6,27,14,0.16)] transition-transform duration-300 ease-out ${
+              mailPanelVisible ? "translate-x-0" : "translate-x-full"
+            }`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex min-h-full flex-col">
+              <div className={`border-b ${theme.cardBorder} ${theme.card} px-6 py-6`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className={`text-[10px] font-bold uppercase tracking-[0.24em] ${theme.heroText} opacity-70`}>
+                      Paso final
+                    </p>
+                    <h3 className={`mt-3 font-headline text-4xl font-bold ${theme.heroText}`}>
+                      Preparar envío
+                    </h3>
+                    <p className={`mt-3 text-sm leading-6 ${theme.heroText} opacity-85`}>
+                      Revisá el asunto y el mensaje antes de enviar el correo simulado.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeMailPanel}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/25 bg-surface text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary"
+                    aria-label="Cerrar panel de envío"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-        <div className="space-y-4 rounded-[1.2rem] border border-outline-variant/15 bg-surface-container-low px-4 py-4">
-          <div className="flex items-center gap-2">
-            <StatusBadge tone="confirmed">Vista previa lista</StatusBadge>
-            <StatusBadge tone={sent ? "confirmed" : "review"}>
-              {sent ? "Enviado simulado" : "Borrador"}
-            </StatusBadge>
-          </div>
+              <div className="flex-1 space-y-5 px-6 py-6">
+                <div className="flex items-center gap-2">
+                  <StatusBadge tone="confirmed">Excel listo</StatusBadge>
+                  <StatusBadge tone={sent ? "confirmed" : "review"}>
+                    {sent ? "Enviado simulado" : "Borrador"}
+                  </StatusBadge>
+                </div>
 
-          <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70">
-              Mensaje de correo
-            </span>
-            <textarea
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              className="mt-2 min-h-[220px] w-full rounded-[1rem] border border-outline-variant/35 bg-surface px-4 py-3 text-sm leading-6 text-primary outline-none"
-            />
-          </label>
+                <label className="block">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70">
+                    Asunto
+                  </span>
+                  <input
+                    value={data.emailSubject}
+                    readOnly
+                    className="mt-2 w-full rounded-[1rem] border border-outline-variant/35 bg-surface px-4 py-3 text-sm text-primary outline-none"
+                  />
+                </label>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/35 bg-surface px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary transition hover:bg-surface-container-high"
-            >
-              <Copy className="h-4 w-4" />
-              {copied ? "Copiado" : "Copiar mensaje"}
-            </button>
+                <label className="block">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70">
+                    Mensaje de correo
+                  </span>
+                  <textarea
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    className="mt-2 min-h-[260px] w-full rounded-[1rem] border border-outline-variant/35 bg-surface px-4 py-3 text-sm leading-6 text-primary outline-none"
+                  />
+                </label>
 
-            <button
-              type="button"
-              onClick={handleMockSend}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-primary transition hover:opacity-95"
-            >
-              <Send className="h-4 w-4" />
-              Enviar mensaje simulado
-            </button>
-          </div>
+                <div className="flex items-start gap-3 rounded-[1rem] bg-surface-container-low px-4 py-3">
+                  <Mail className="mt-0.5 h-4 w-4 text-primary/70" />
+                  <div className="text-sm leading-6 text-on-surface-variant">
+                    <p className="font-semibold text-primary">El envío sigue siendo simulado</p>
+                    <p className="mt-1">
+                      El backend de correo todavía no está conectado. Esta acción no envía un email real.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex items-start gap-3 rounded-[1rem] bg-surface-container-low px-4 py-3">
-            <Mail className="mt-0.5 h-4 w-4 text-primary/70" />
-            <div className="text-sm leading-6 text-on-surface-variant">
-              <p className="font-semibold text-primary">Todavía no hay servicio de correo en el backend</p>
-              <p className="mt-1">
-                Esta acción solo actualiza la pantalla y es segura mientras el contrato de envío está pendiente.
-              </p>
+              <div className="border-t border-outline-variant/15 px-6 py-5">
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/35 bg-surface px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary transition hover:bg-surface-container-high"
+                  >
+                    <Copy className="h-4 w-4" />
+                    {copied ? "Copiado" : "Copiar mensaje"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleMockSend}
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-primary transition hover:opacity-95"
+                  >
+                    <Send className="h-4 w-4" />
+                    Enviar mensaje simulado
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div className="rounded-[1.2rem] border border-outline-variant/15 bg-surface-container-low px-4 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70">
-            Checklist de facturación
-          </p>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-on-surface-variant">
-            <li>Confirmá la cantidad de clases con las notas de la profesora.</li>
-            <li>Revisá la vista previa antes de descargar el XLSX.</li>
-            <li>Enviá el correo simulado cuando llegue el backend de correo.</li>
-          </ul>
-        </div>
-      </SectionFrame>
-    </div>
+      ) : null}
+    </>
   );
 }

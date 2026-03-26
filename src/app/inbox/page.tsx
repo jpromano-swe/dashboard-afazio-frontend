@@ -1,6 +1,5 @@
 import { CircleAlert } from "lucide-react";
 import {
-  ActionButton,
   DashboardShell,
   MobileTableHint,
   PageActions,
@@ -24,7 +23,7 @@ export default async function InboxPage() {
   return (
     <DashboardShell
       active="inbox"
-      title="Clases Pendientes"
+      title="Pendientes"
       actions={<PageActions />}
     >
       <div className="space-y-8">
@@ -32,25 +31,25 @@ export default async function InboxPage() {
           <SectionFrame className="bg-surface-container-lowest">
             <div className="flex items-center justify-between">
               <h3 className="font-headline text-3xl font-bold text-primary">
-                Resumen pendiente
+                Resumen de pendientes
               </h3>
               <CircleAlert className="h-5 w-5 text-[#ad6e24]" />
             </div>
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4 sm:block sm:border-b-0 sm:rounded-[1.1rem] sm:bg-surface-container-low sm:px-7 sm:py-6">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
-                  Horas sin clasificar
+              <div className="border-b border-outline-variant/20 pb-4 sm:rounded-[1.1rem] sm:border-b-0 sm:bg-surface-container-low sm:px-8 sm:py-7">
+                <span className="block text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
+                  Horas pendientes
                 </span>
-                <span className="font-headline text-4xl font-bold text-primary">
+                <span className="mt-3 block font-sans text-5xl font-black tracking-[-0.04em] text-primary">
                   {data.pendingHours}
                 </span>
               </div>
-              <div className="flex items-center justify-between sm:block sm:rounded-[1.1rem] sm:bg-surface-container-low sm:px-7 sm:py-6">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
+              <div className="sm:rounded-[1.1rem] sm:bg-surface-container-low sm:px-8 sm:py-7">
+                <span className="block text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">
                   Valor facturable estimado
                 </span>
-                <span className="font-headline text-4xl font-bold text-primary">
+                <span className="mt-3 block font-sans text-5xl font-black tracking-[-0.04em] text-primary">
                   {data.estimatedValue}
                 </span>
               </div>
@@ -96,7 +95,7 @@ export default async function InboxPage() {
           <MobileTableHint />
 
           <div className="mt-6 overflow-x-auto">
-            <div className="min-w-[920px]">
+            <div className="min-w-[820px]">
               <div
                 className="grid border-b border-outline-variant/20 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/70"
                 style={{ gridTemplateColumns: PENDING_CLASSIFICATION_COLUMNS }}
@@ -115,19 +114,10 @@ export default async function InboxPage() {
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col gap-4 border-t border-outline-variant/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <p className="max-w-sm text-sm italic text-on-surface-variant">
-              Consejo: las clases quedan facturables por defecto. Solo necesitás elegir
-              la consultora y el curso correcto para guardarlas.
+          <div className="mt-10 border-t border-outline-variant/20 pt-8">
+            <p className="max-w-xl text-sm italic leading-6 text-on-surface-variant">
+              Las clases quedan facturables por defecto. Tocá <span className="font-semibold text-primary">Clasificar</span> en cada fila para elegir la consultora y vincular la sesión a un curso existente.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <ActionButton variant="outline" disabled>
-                Descartar seleccionadas
-              </ActionButton>
-              <ActionButton variant="primary" disabled>
-                Confirmar clasificación
-              </ActionButton>
-            </div>
           </div>
         </SectionFrame>
       </div>

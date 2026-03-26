@@ -15,7 +15,7 @@ const notoSerif = Noto_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Afazio Atelier",
+  title: "Afazio Comunicacion",
   description: "Editorial dashboard built in Next.js 16 and Tailwind CSS.",
 };
 
