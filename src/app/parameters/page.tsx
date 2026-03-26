@@ -8,7 +8,7 @@ import {
   SectionFrame,
   StatusBadge,
 } from "@/components/editorial";
-import { CourseCardActions } from "@/components/course-card-actions";
+import { ConsultoraCourseCatalog } from "@/components/consultora-course-catalog";
 import { ParametersManagementPanel } from "@/components/parameters-management-panel";
 import { getConsultoras, getCursos, isRealConsultora } from "@/lib/backend";
 
@@ -19,10 +19,10 @@ function getConsultoraColorScheme(name: string) {
     return {
       frame: "border-[#d9cff6] bg-[#f6f1ff]",
       icon: "bg-[#e3d8fb] text-[#42315f]",
-      metric: "bg-[#efe7ff]",
-      courses: "border-[#dacbf6] bg-[#f4edff]",
-      courseCard: "bg-white/78",
-      courseExpanded: "bg-[#efe8ff]",
+      metric: "bg-white/72",
+      courses: "border-outline-variant/20 bg-white/42",
+      courseCard: "bg-white/82",
+      courseExpanded: "bg-white/72",
     };
   }
 
@@ -30,10 +30,10 @@ function getConsultoraColorScheme(name: string) {
     return {
       frame: "border-[#ead48d] bg-[#fcf4dc]",
       icon: "bg-[#f6e9b7] text-[#5c4b17]",
-      metric: "bg-[#fbf0c6]",
-      courses: "border-[#e7d08a] bg-[#fdf4d6]",
-      courseCard: "bg-white/72",
-      courseExpanded: "bg-[#fbefc3]",
+      metric: "bg-white/72",
+      courses: "border-outline-variant/20 bg-white/40",
+      courseCard: "bg-white/82",
+      courseExpanded: "bg-white/72",
     };
   }
 
@@ -41,10 +41,10 @@ function getConsultoraColorScheme(name: string) {
     return {
       frame: "border-[#efc3b9] bg-[#fce9e4]",
       icon: "bg-[#f6d5cb] text-[#6d3e35]",
-      metric: "bg-[#f9dfd7]",
-      courses: "border-[#ebbcb1] bg-[#fce6e0]",
-      courseCard: "bg-white/74",
-      courseExpanded: "bg-[#f9ddd4]",
+      metric: "bg-white/72",
+      courses: "border-outline-variant/20 bg-white/40",
+      courseCard: "bg-white/82",
+      courseExpanded: "bg-white/72",
     };
   }
 
@@ -241,68 +241,15 @@ export default async function ParametersPage() {
                   </div>
 
                   {cursos.length > 0 ? (
-                    <div className="mt-5 space-y-4">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {cursos.slice(0, 4).map((curso) => (
-                          <div
-                            key={curso.id}
-                            className={`group/course relative rounded-xl px-4 py-3 pr-24 ${colorScheme.courseCard}`}
-                          >
-                            <CourseCardActions
-                              curso={curso}
-                              consultoras={consultoras}
-                              backendUnavailable={backendUnavailable}
-                            />
-                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
-                              Curso #{curso.id}
-                            </p>
-                            <p className="mt-2 text-sm font-semibold text-primary">
-                              {curso.empresa}
-                              {curso.grupo ? ` - ${curso.grupo}` : ""}
-                            </p>
-                            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
-                              {curso.activa ? "Activa" : "Inactiva"}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {cursos.length > 4 ? (
-                        <div
-                          className={`rounded-xl border border-outline-variant/18 px-4 py-3 ${colorScheme.courseCard}`}
-                        >
-                          <details>
-                            <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-                              Ver los {cursos.length} cursos
-                            </summary>
-                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                              {cursos.slice(4).map((curso) => (
-                                <div
-                                  key={curso.id}
-                                  className={`group/course relative rounded-xl px-4 py-3 pr-24 ${colorScheme.courseExpanded}`}
-                                >
-                                  <CourseCardActions
-                                    curso={curso}
-                                    consultoras={consultoras}
-                                    backendUnavailable={backendUnavailable}
-                                  />
-                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
-                                    Curso #{curso.id}
-                                  </p>
-                                  <p className="mt-2 text-sm font-semibold text-primary">
-                                    {curso.empresa}
-                                    {curso.grupo ? ` - ${curso.grupo}` : ""}
-                                  </p>
-                                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">
-                                    {curso.activa ? "Activa" : "Inactiva"}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        </div>
-                      ) : null}
-                    </div>
+                    <ConsultoraCourseCatalog
+                      cursos={cursos}
+                      consultoras={consultoras}
+                      backendUnavailable={backendUnavailable}
+                      tone={{
+                        courseCard: colorScheme.courseCard,
+                        courseExpanded: colorScheme.courseExpanded,
+                      }}
+                    />
                   ) : (
                     <div className={`mt-5 rounded-xl px-4 py-3 ${colorScheme.courseCard}`}>
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
