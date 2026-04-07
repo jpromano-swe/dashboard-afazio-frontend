@@ -154,6 +154,7 @@ export const dashboardData: DashboardData = {
   weekRangeLabel: "Esta semana",
   metrics: [
     { label: "Clases de hoy", value: "06", icon: "calendar" },
+    { label: "Clases pendientes hoy", value: "12", icon: "tasks" },
     {
       label: "Clasificación pendiente",
       value: "03",
@@ -161,7 +162,6 @@ export const dashboardData: DashboardData = {
       accent: "amber",
     },
     { label: "Ingresos mensuales", value: "ARS 4.820", icon: "income" },
-    { label: "Próximas tareas", value: "12", icon: "tasks" },
   ],
   schedule: [
     {

@@ -516,6 +516,13 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
           icon: "calendar",
         },
         {
+          label: "Clases pendientes hoy",
+          value: String(
+            todayClasses.filter((clase) => clase.estado === "PROGRAMADA").length,
+          ).padStart(2, "0"),
+          icon: "tasks",
+        },
+        {
           label: "Clasificación pendiente",
           value: String(pendingClasses.length).padStart(2, "0"),
           icon: "pending",
@@ -528,13 +535,6 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
             : "No disponible",
           icon: "income",
           helper: incomeErrorMessage ? "Revisá el solapamiento de tarifas activas" : undefined,
-        },
-        {
-          label: "Próximas tareas",
-          value: String(
-            todayClasses.filter((clase) => clase.estado === "PROGRAMADA").length,
-          ).padStart(2, "0"),
-          icon: "tasks",
         },
       ],
       schedule: todayClasses.map(mapClaseToScheduleEntry),

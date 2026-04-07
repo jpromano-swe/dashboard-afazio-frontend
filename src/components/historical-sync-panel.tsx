@@ -11,6 +11,8 @@ const NGROK_SKIP_BROWSER_WARNING_HEADER = {
 };
 
 type HistoricalSyncPanelProps = {
+  from: string;
+  to: string;
   rangeLabel: string;
   syncUrl: string;
 };
@@ -24,6 +26,8 @@ function getErrorMessage(error: unknown) {
 }
 
 export function HistoricalSyncPanel({
+  from,
+  to,
   rangeLabel,
   syncUrl,
 }: HistoricalSyncPanelProps) {
@@ -75,39 +79,80 @@ export function HistoricalSyncPanel({
 
   return (
     <div className="rounded-[1.3rem] border border-outline-variant/20 bg-surface-container-low px-4 py-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-on-surface-variant">
-            Sincronización del rango
-          </p>
-          <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-            Sincronizá Google Calendar para {rangeLabel} antes de marcar las clases como dictadas.
-          </p>
+              Sincronización del rango
+            </p>
+            <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+              Ajustá el período que querés revisar y sincronizá Google Calendar antes de marcar las clases como dictadas.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusBadge tone="archived">{rangeLabel}</StatusBadge>
+            {isRefreshing ? (
+              <StatusBadge tone="review">Actualizando</StatusBadge>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {isRefreshing ? (
-            <StatusBadge tone="review">Actualizando</StatusBadge>
-          ) : null}
+        <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
+          <label className="space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
+              Desde
+            </span>
+            <input
+              type="date"
+              name="from"
+              defaultValue={from}
+              className="w-full rounded-xl border border-outline-variant/35 bg-surface px-4 py-3 text-sm text-primary outline-none"
+            />
+          </label>
 
-          <ActionButton
-            type="button"
-            variant="secondary"
-            icon={
-              isSyncing ? (
-                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CalendarSync className="h-3.5 w-3.5" />
-              )
-            }
-            onClick={handleSync}
-            disabled={isSyncing || isRefreshing}
-          >
-            Sincronizar este rango
-          </ActionButton>
-        </div>
+          <label className="space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
+              Hasta
+            </span>
+            <input
+              type="date"
+              name="to"
+              defaultValue={to}
+              className="w-full rounded-xl border border-outline-variant/35 bg-surface px-4 py-3 text-sm text-primary outline-none"
+            />
+          </label>
+
+          <div className="flex items-end">
+            <ActionButton
+              type="submit"
+              variant="secondary"
+              className="h-[50px] w-full justify-center"
+            >
+              Actualizar rango
+            </ActionButton>
+          </div>
+
+          <div className="flex items-end">
+            <ActionButton
+              type="button"
+              variant="secondary"
+              icon={
+                isSyncing ? (
+                  <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <CalendarSync className="h-3.5 w-3.5" />
+                )
+              }
+              onClick={handleSync}
+              disabled={isSyncing || isRefreshing}
+              className="h-[50px] w-full justify-center"
+            >
+              Sincronizar este rango
+            </ActionButton>
+          </div>
+        </form>
       </div>
-
     </div>
   );
 }

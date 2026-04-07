@@ -61,6 +61,8 @@ type MetricCardProps = {
   icon: ReactNode;
   helper?: string;
   accent?: "default" | "amber";
+  className?: string;
+  valueClassName?: string;
 };
 
 type SectionFrameProps = {
@@ -312,9 +314,16 @@ export function MetricCard({
   icon,
   helper,
   accent = "default",
+  className,
+  valueClassName,
 }: MetricCardProps) {
   return (
-    <div className="paper-panel rounded-[1.4rem] bg-surface-container-lowest p-6">
+    <div
+      className={cn(
+        "paper-panel rounded-[1.4rem] bg-surface-container-lowest p-6",
+        className,
+      )}
+    >
       <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70">
         {label}
       </p>
@@ -324,6 +333,7 @@ export function MetricCard({
             className={cn(
               "font-headline text-5xl font-bold tracking-tight text-primary",
               accent === "amber" && "text-[#c28532]",
+              valueClassName,
             )}
           >
             {value}

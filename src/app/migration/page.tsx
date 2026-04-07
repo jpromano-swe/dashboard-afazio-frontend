@@ -13,12 +13,43 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function MigrationPage() {
+type MigrationSearchParams = {
+  from?: string | string[];
+  to?: string | string[];
+};
+
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function isIsoDate(value: string | undefined) {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+}
+
+function formatRangeDate(value: string) {
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date(`${value}T12:00:00`));
+}
+
+export default async function MigrationPage({
+  searchParams,
+}: {
+  searchParams?: Promise<MigrationSearchParams>;
+}) {
   const today = new Date();
   const periodStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const periodEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const from = `${periodStart.getFullYear()}-${String(periodStart.getMonth() + 1).padStart(2, "0")}-${String(periodStart.getDate()).padStart(2, "0")}`;
-  const to = `${periodEnd.getFullYear()}-${String(periodEnd.getMonth() + 1).padStart(2, "0")}-${String(periodEnd.getDate()).padStart(2, "0")}`;
+  const defaultFrom = `${periodStart.getFullYear()}-${String(periodStart.getMonth() + 1).padStart(2, "0")}-${String(periodStart.getDate()).padStart(2, "0")}`;
+  const defaultTo = `${periodEnd.getFullYear()}-${String(periodEnd.getMonth() + 1).padStart(2, "0")}-${String(periodEnd.getDate()).padStart(2, "0")}`;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const fromParam = firstValue(resolvedSearchParams.from);
+  const toParam = firstValue(resolvedSearchParams.to);
+  const from = isIsoDate(fromParam) ? fromParam : defaultFrom;
+  const to = isIsoDate(toParam) ? toParam : defaultTo;
   const [migrationClasses, consultoras] = await Promise.all([
     getClasesPorPeriodo(from, to, {
       soloClasificadas: true,
@@ -29,10 +60,7 @@ export default async function MigrationPage() {
     .filter(isRealConsultora)
     .slice()
     .sort((left, right) => left.nombre.localeCompare(right.nombre));
-  const monthLabelEs = new Intl.DateTimeFormat("es-AR", {
-    month: "long",
-    year: "numeric",
-  }).format(today);
+  const selectedRangeLabel = `${formatRangeDate(from)} a ${formatRangeDate(to)}`;
   const syncUrl = getGoogleSyncUrl(
     `${from}T00:00:00-03:00`,
     `${to}T23:59:59-03:00`,
@@ -50,16 +78,21 @@ export default async function MigrationPage() {
             Carga histórica
           </p>
           <h2 className="mt-3 font-headline text-5xl font-bold tracking-tight text-primary">
-            Historial de {monthLabelEs}
+            Historial
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-on-surface-variant">
-            Revisá el mes seleccionado, sincronizá el rango del calendario y corregí estados o clasificaciones sobre la base histórica.
+            Revisá {selectedRangeLabel}, sincronizá el rango del calendario y corregí estados o clasificaciones sobre la base histórica.
           </p>
         </div>
       </div>
 
       <div className="mt-6">
-        <HistoricalSyncPanel rangeLabel={`${from} a ${to}`} syncUrl={syncUrl} />
+        <HistoricalSyncPanel
+          from={from}
+          to={to}
+          rangeLabel={`${from} a ${to}`}
+          syncUrl={syncUrl}
+        />
       </div>
 
       <MigrationHistoryTable

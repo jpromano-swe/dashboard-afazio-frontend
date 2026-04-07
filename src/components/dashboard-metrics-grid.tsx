@@ -24,7 +24,10 @@ const metricIcons = {
 };
 
 function shouldHideMetric(metric: DashboardMetric) {
-  if (metric.label !== "Clasificación pendiente" && metric.label !== "Próximas tareas") {
+  if (
+    metric.label !== "Clasificación pendiente" &&
+    metric.label !== "Clases pendientes hoy"
+  ) {
     return false;
   }
 
@@ -34,9 +37,11 @@ function shouldHideMetric(metric: DashboardMetric) {
 }
 
 function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
+  const isIncome = metric.label === "Ingresos mensuales";
+
   return (
     <div
-      className="opacity-0"
+      className={isIncome ? "opacity-0 lg:col-span-2" : "opacity-0"}
       style={{
         animation: "dashboard-card-in 220ms ease-out forwards",
       }}
@@ -47,6 +52,16 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
         icon={metricIcons[metric.icon]}
         helper={metric.helper}
         accent={metric.accent}
+        className={
+          isIncome
+            ? "bg-[#eef5ec] ring-1 ring-[#d2e1cf]"
+            : undefined
+        }
+        valueClassName={
+          isIncome
+            ? "text-[clamp(2.15rem,4vw,3.6rem)] leading-none"
+            : undefined
+        }
       />
     </div>
   );
@@ -91,7 +106,7 @@ export function DashboardMetricsGrid({ metrics, view, weeklyCount }: DashboardMe
       <div
         className="grid gap-6"
         style={{
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
         }}
       >
         {visibleMetrics.map((metric) => {
