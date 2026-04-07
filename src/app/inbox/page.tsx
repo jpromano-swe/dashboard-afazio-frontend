@@ -13,6 +13,8 @@ import {
 import { getConsultoras, isRealConsultora } from "@/lib/backend";
 import { getInboxData } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 export default async function InboxPage() {
   const [data, consultoras] = await Promise.all([
     getInboxData(),

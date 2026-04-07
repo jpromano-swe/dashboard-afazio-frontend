@@ -26,6 +26,10 @@ function isIsoDate(value: string | undefined) {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
 }
 
+function resolveDateParam(value: string | undefined, fallback: string) {
+  return value && isIsoDate(value) ? value : fallback;
+}
+
 function formatRangeDate(value: string) {
   return new Intl.DateTimeFormat("es-AR", {
     day: "2-digit",
@@ -48,8 +52,8 @@ export default async function MigrationPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const fromParam = firstValue(resolvedSearchParams.from);
   const toParam = firstValue(resolvedSearchParams.to);
-  const from = isIsoDate(fromParam) ? fromParam : defaultFrom;
-  const to = isIsoDate(toParam) ? toParam : defaultTo;
+  const from = resolveDateParam(fromParam, defaultFrom);
+  const to = resolveDateParam(toParam, defaultTo);
   const [migrationClasses, consultoras] = await Promise.all([
     getClasesPorPeriodo(from, to, {
       soloClasificadas: true,

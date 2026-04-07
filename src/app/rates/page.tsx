@@ -9,6 +9,8 @@ import { RateCreateModal } from "@/components/rate-create-modal";
 import { getConsultoras, isRealConsultora } from "@/lib/backend";
 import { getRatesData } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 export default async function RatesPage() {
   const [data, consultoras] = await Promise.all([
     getRatesData(),
