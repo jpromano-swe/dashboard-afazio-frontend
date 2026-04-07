@@ -54,7 +54,7 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
         accent={metric.accent}
         className={
           isIncome
-            ? "bg-[#214d2f] text-[#f4fbf2] ring-1 ring-[#173620]/12 shadow-[0_18px_40px_rgba(20,49,29,0.18)]"
+            ? "!bg-[#214d2f] !text-[#f4fbf2] ring-1 ring-[#173620]/12 shadow-[0_18px_40px_rgba(20,49,29,0.18)]"
             : undefined
         }
         valueClassName={

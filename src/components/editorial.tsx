@@ -326,7 +326,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "paper-panel min-h-[156px] rounded-[1.4rem] bg-surface-container-lowest p-6",
+        "paper-panel flex h-[156px] flex-col rounded-[1.4rem] bg-surface-container-lowest p-6",
         className,
       )}
     >
