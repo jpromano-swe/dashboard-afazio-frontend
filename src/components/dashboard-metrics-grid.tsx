@@ -14,6 +14,7 @@ type DashboardMetricsGridProps = {
   metrics: DashboardMetric[];
   view: "today" | "weekly";
   weeklyCount: number;
+  weeklyPendingCount: number;
 };
 
 const metricIcons = {
@@ -71,7 +72,12 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
   );
 }
 
-function resolveMetric(metric: DashboardMetric, view: "today" | "weekly", weeklyCount: number) {
+function resolveMetric(
+  metric: DashboardMetric,
+  view: "today" | "weekly",
+  weeklyCount: number,
+  weeklyPendingCount: number,
+) {
   if (metric.label === "Clases de hoy") {
     if (view === "weekly") {
       return {
@@ -88,13 +94,19 @@ function resolveMetric(metric: DashboardMetric, view: "today" | "weekly", weekly
     return {
       ...metric,
       label: "Clases semanales pendientes",
+      value: String(weeklyPendingCount).padStart(2, "0"),
     };
   }
 
   return metric;
 }
 
-export function DashboardMetricsGrid({ metrics, view, weeklyCount }: DashboardMetricsGridProps) {
+export function DashboardMetricsGrid({
+  metrics,
+  view,
+  weeklyCount,
+  weeklyPendingCount,
+}: DashboardMetricsGridProps) {
   const visibleMetrics = useMemo(
     () => metrics.filter((metric) => !shouldHideMetric(metric)),
     [metrics],
@@ -121,7 +133,12 @@ export function DashboardMetricsGrid({ metrics, view, weeklyCount }: DashboardMe
         }}
       >
         {visibleMetrics.map((metric) => {
-          const resolvedMetric = resolveMetric(metric, view, weeklyCount);
+          const resolvedMetric = resolveMetric(
+            metric,
+            view,
+            weeklyCount,
+            weeklyPendingCount,
+          );
 
           return (
             <AnimatedMetricCard

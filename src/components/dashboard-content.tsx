@@ -12,8 +12,18 @@ type DashboardContentProps = {
 export function DashboardContent({ data }: DashboardContentProps) {
   const [view, setView] = useState<"today" | "weekly">("today");
 
-  const weeklyCount = useMemo(
+  const weeklyTotalCount = useMemo(
     () => data.weeklySchedule.reduce((total, day) => total + day.entries.length, 0),
+    [data.weeklySchedule],
+  );
+  const weeklyPendingCount = useMemo(
+    () =>
+      data.weeklySchedule.reduce(
+        (total, day) =>
+          total +
+          day.entries.filter((entry) => entry.classState === "PROGRAMADA").length,
+        0,
+      ),
     [data.weeklySchedule],
   );
 
@@ -22,7 +32,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
       <DashboardMetricsGrid
         metrics={data.metrics}
         view={view}
-        weeklyCount={weeklyCount}
+        weeklyCount={weeklyTotalCount}
+        weeklyPendingCount={weeklyPendingCount}
       />
 
       {data.backendNotice ? (

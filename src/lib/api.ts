@@ -315,7 +315,6 @@ function buildWeeklySchedule(classes: ClaseDelDiaResponse[], date = new Date()) 
     const dayKey = toIsoDate(current);
     const entries = classes
       .filter((clase) => toTimeZoneIsoDate(clase.fechaInicio) === dayKey)
-      .filter((clase) => clase.estado === "PROGRAMADA")
       .filter((clase) => shouldIncludeClassTitle(clase.titulo))
       .map(mapClaseToScheduleEntry);
 

@@ -105,6 +105,15 @@ export function DashboardScheduleSwitcher({
     () => weeklySchedule.reduce((total, day) => total + day.entries.length, 0),
     [weeklySchedule],
   );
+  const weeklyPendingCount = useMemo(
+    () =>
+      weeklySchedule.reduce(
+        (total, day) =>
+          total + day.entries.filter((entry) => entry.classState === "PROGRAMADA").length,
+        0,
+      ),
+    [weeklySchedule],
+  );
 
   const activeSizerRef = view === "today" ? todaySizerRef : weeklySizerRef;
 
@@ -289,7 +298,7 @@ export function DashboardScheduleSwitcher({
                 <div className="flex items-center gap-2">
                   <StatusBadge tone="confirmed">{weekRangeLabel}</StatusBadge>
                   <span className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-                    {weeklyClassCount} clases programadas
+                    {weeklyPendingCount} de {weeklyClassCount} clases programadas
                   </span>
                 </div>
               </div>
@@ -319,11 +328,14 @@ export function DashboardScheduleSwitcher({
                         day.entries.map((entry) => (
                           (() => {
                             const tone = getConsultoraTone(entry.consultantName);
+                            const weeklyCardClass = entry.muted
+                              ? "border-outline-variant/22 bg-surface-container-low opacity-65 saturate-0"
+                              : tone.card;
 
                             return (
                           <div
                             key={entry.id ?? entry.googleEventId ?? `${entry.title}-${entry.time}`}
-                            className={`rounded-2xl border px-3 py-3 ${tone.card}`}
+                            className={`rounded-2xl border px-3 py-3 ${weeklyCardClass}`}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/70">
