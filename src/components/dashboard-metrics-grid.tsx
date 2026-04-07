@@ -54,12 +54,13 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
         accent={metric.accent}
         className={
           isIncome
-            ? "!bg-[#1b3022] !text-[#ffffff] !px-8 ring-1 ring-[#132318]/12 shadow-[0_18px_40px_rgba(14,29,19,0.18)]"
+            ? "!bg-[#1b3022] !text-[#ffffff] !px- ring-1 ring-[#132318]/12 shadow-[0_18px_40px_rgba(14,29,19,0.18)]"
             : undefined
         }
+        contentClassName={isIncome ? "!mt-3 items-end" : undefined}
         valueClassName={
           isIncome
-            ? "pl-1 text-[clamp(2.15rem,4vw,3.6rem)] leading-none text-[#ffffff]"
+            ? "!text-white pl-0 text-[clamp(2.15rem,4vw,3.6rem)] leading-none"
             : undefined
         }
         labelClassName={isIncome ? "text-white/72" : undefined}

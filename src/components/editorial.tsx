@@ -62,6 +62,7 @@ type MetricCardProps = {
   helper?: string;
   accent?: "default" | "amber";
   className?: string;
+  contentClassName?: string;
   valueClassName?: string;
   labelClassName?: string;
   helperClassName?: string;
@@ -318,6 +319,7 @@ export function MetricCard({
   helper,
   accent = "default",
   className,
+  contentClassName,
   valueClassName,
   labelClassName,
   helperClassName,
@@ -340,7 +342,7 @@ export function MetricCard({
           {label}
         </p>
       </div>
-      <div className="mt-8 flex items-end justify-between gap-5">
+      <div className={cn("mt-8 flex items-end justify-between gap-5", contentClassName)}>
         <div className="min-w-0 flex-1">
           <div
             className={cn(
