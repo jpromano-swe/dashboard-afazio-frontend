@@ -330,14 +330,16 @@ export function MetricCard({
         className,
       )}
     >
-      <p
-        className={cn(
-          "text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70",
-          labelClassName,
-        )}
-      >
-        {label}
-      </p>
+      <div className="flex min-h-[2.35rem] items-start">
+        <p
+          className={cn(
+            "text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70",
+            labelClassName,
+          )}
+        >
+          {label}
+        </p>
+      </div>
       <div className="mt-8 flex items-end justify-between gap-5">
         <div className="min-w-0 flex-1">
           <div
