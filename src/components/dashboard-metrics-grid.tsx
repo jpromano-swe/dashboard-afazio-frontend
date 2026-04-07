@@ -54,17 +54,17 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
         accent={metric.accent}
         className={
           isIncome
-            ? "!bg-[#214d2f] !text-[#f4fbf2] ring-1 ring-[#173620]/12 shadow-[0_18px_40px_rgba(20,49,29,0.18)]"
+            ? "!bg-[#1b3022] !text-[#ffffff] !px-8 ring-1 ring-[#132318]/12 shadow-[0_18px_40px_rgba(14,29,19,0.18)]"
             : undefined
         }
         valueClassName={
           isIncome
-            ? "text-[clamp(2.15rem,4vw,3.6rem)] leading-none text-[#f4fbf2]"
+            ? "pl-1 text-[clamp(2.15rem,4vw,3.6rem)] leading-none text-[#ffffff]"
             : undefined
         }
-        labelClassName={isIncome ? "text-[#cfe0d2]" : undefined}
-        helperClassName={isIncome ? "text-[#b8cfbd]" : undefined}
-        iconClassName={isIncome ? "bg-white/12 text-[#e2eee4]" : undefined}
+        labelClassName={isIncome ? "text-white/72" : undefined}
+        helperClassName={isIncome ? "text-white/72" : undefined}
+        iconClassName={isIncome ? "bg-white/12 text-white" : undefined}
       />
     </div>
   );
