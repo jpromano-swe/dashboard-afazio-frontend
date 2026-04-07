@@ -195,7 +195,7 @@ export default async function IncomePage({
               <p className="mt-3 text-sm text-[#b4cdb8]">
                 {showDistinctTotals
                   ? "Ganancias proyectadas para el rango seleccionado."
-                  : "Total listo para leer y conciliar en el rango seleccionado."}
+                  : "Total facturable en el rango seleccionado."}
               </p>
             </div>
             <CalendarDays className="mt-1 h-6 w-6 text-[#b4cdb8]" />
