@@ -58,15 +58,30 @@ function pad(value: number) {
 }
 
 function toIsoDate(date: Date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
+function toTimeZoneCalendarDate(dateInput: string | Date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DEFAULT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(dateInput));
+
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  const day = Number(parts.find((part) => part.type === "day")?.value);
+
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 }
 
 function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 12, 0, 0));
 }
 
 function endOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12, 0, 0));
 }
 
 function formatShortDate(dateInput: string | Date) {
@@ -138,10 +153,13 @@ function normalize(value: string | null | undefined) {
 }
 
 function buildPeriod(date = new Date()): BillingPeriod {
-  const periodDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  const baseDate = toTimeZoneCalendarDate(date);
+  const periodDate = new Date(
+    Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), 1, 12, 0, 0),
+  );
 
   return {
-    key: `${periodDate.getFullYear()}-${pad(periodDate.getMonth() + 1)}`,
+    key: `${periodDate.getUTCFullYear()}-${pad(periodDate.getUTCMonth() + 1)}`,
     from: toIsoDate(startOfMonth(periodDate)),
     to: toIsoDate(endOfMonth(periodDate)),
     label: formatMonthYear(periodDate),

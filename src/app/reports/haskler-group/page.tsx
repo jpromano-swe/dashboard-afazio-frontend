@@ -22,7 +22,7 @@ function parsePeriodKey(value: string | undefined) {
     return null;
   }
 
-  return new Date(year, month - 1, 1);
+  return new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
 }
 
 export default async function HasklerReportPage({
