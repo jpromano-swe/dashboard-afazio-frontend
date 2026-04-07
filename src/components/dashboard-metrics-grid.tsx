@@ -54,29 +54,39 @@ function AnimatedMetricCard({ metric }: { metric: DashboardMetric }) {
         accent={metric.accent}
         className={
           isIncome
-            ? "bg-[#eef5ec] ring-1 ring-[#d2e1cf]"
+            ? "bg-primary-container text-on-primary ring-1 ring-[#1f4d2d]/10"
             : undefined
         }
         valueClassName={
           isIncome
-            ? "text-[clamp(2.15rem,4vw,3.6rem)] leading-none"
+            ? "text-[clamp(2.15rem,4vw,3.6rem)] leading-none text-on-primary"
             : undefined
         }
+        labelClassName={isIncome ? "text-[#c3d4c6]" : undefined}
+        helperClassName={isIncome ? "text-[#b4cdb8]" : undefined}
+        iconClassName={isIncome ? "bg-[#f5fbf4]/14 text-[#d5e5d6]" : undefined}
       />
     </div>
   );
 }
 
 function resolveMetric(metric: DashboardMetric, view: "today" | "weekly", weeklyCount: number) {
-  if (metric.label !== "Clases de hoy") {
+  if (metric.label === "Clases de hoy") {
+    if (view === "weekly") {
+      return {
+        ...metric,
+        label: "Clases de esta semana",
+        value: String(weeklyCount).padStart(2, "0"),
+      };
+    }
+
     return metric;
   }
 
-  if (view === "weekly") {
+  if (metric.label === "Clases pendientes hoy" && view === "weekly") {
     return {
       ...metric,
-      label: "Clases de esta semana",
-      value: String(weeklyCount).padStart(2, "0"),
+      label: "Clases semanales pendientes",
     };
   }
 

@@ -325,9 +325,14 @@ export function DashboardScheduleSwitcher({
                             key={entry.id ?? entry.googleEventId ?? `${entry.title}-${entry.time}`}
                             className={`rounded-2xl border px-3 py-3 ${tone.card}`}
                           >
-                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/70">
-                              {entry.time}
-                            </p>
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/70">
+                                {entry.time}
+                              </p>
+                              <span className="inline-flex rounded-full bg-white/78 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant shadow-[0_1px_0_rgba(6,27,14,0.06)]">
+                                {entry.duration}
+                              </span>
+                            </div>
                             <p className="mt-2 font-semibold text-primary">{entry.title}</p>
                             <p className="mt-1 text-xs text-on-surface-variant">{entry.subtitle}</p>
                             {entry.classState === "PROGRAMADA" && entry.meetingUrl ? (

@@ -63,6 +63,9 @@ type MetricCardProps = {
   accent?: "default" | "amber";
   className?: string;
   valueClassName?: string;
+  labelClassName?: string;
+  helperClassName?: string;
+  iconClassName?: string;
 };
 
 type SectionFrameProps = {
@@ -316,15 +319,23 @@ export function MetricCard({
   accent = "default",
   className,
   valueClassName,
+  labelClassName,
+  helperClassName,
+  iconClassName,
 }: MetricCardProps) {
   return (
     <div
       className={cn(
-        "paper-panel rounded-[1.4rem] bg-surface-container-lowest p-6",
+        "paper-panel min-h-[156px] rounded-[1.4rem] bg-surface-container-lowest p-6",
         className,
       )}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70">
+      <p
+        className={cn(
+          "text-[10px] font-semibold uppercase tracking-[0.25em] text-on-surface-variant/70",
+          labelClassName,
+        )}
+      >
         {label}
       </p>
       <div className="mt-8 flex items-end justify-between gap-5">
@@ -339,13 +350,16 @@ export function MetricCard({
             {value}
           </div>
           {helper ? (
-            <p className="mt-2 text-xs text-on-surface-variant/70">{helper}</p>
+            <p className={cn("mt-2 text-xs text-on-surface-variant/70", helperClassName)}>
+              {helper}
+            </p>
           ) : null}
         </div>
         <div
           className={cn(
             "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface-container-high text-primary/60",
             accent === "amber" && "bg-[#fde9cf] text-[#ad6e24]",
+            iconClassName,
           )}
         >
           {icon}
