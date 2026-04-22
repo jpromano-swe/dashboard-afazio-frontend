@@ -105,6 +105,7 @@ export default async function MigrationPage({
       <MigrationHistoryTable
         classes={migrationClasses}
         consultoras={activeConsultoras}
+        rangeLabel={selectedRangeLabel}
       />
     </DashboardShell>
   );

@@ -9,6 +9,7 @@ import type { ClaseDelDiaResponse, ConsultoraResponse } from "@/lib/backend";
 type MigrationHistoryTableProps = {
   classes: ClaseDelDiaResponse[];
   consultoras: ConsultoraResponse[];
+  rangeLabel: string;
 };
 
 const PAGE_SIZE = 50;
@@ -28,6 +29,7 @@ function getStatusFilterValue(clase: ClaseDelDiaResponse) {
 export function MigrationHistoryTable({
   classes,
   consultoras,
+  rangeLabel,
 }: MigrationHistoryTableProps) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -69,6 +71,15 @@ export function MigrationHistoryTable({
 
   return (
     <SectionFrame className="mt-6 bg-surface-container-lowest p-0">
+      <div className="border-b border-outline-variant/15 px-6 py-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
+          Historial de clases
+        </p>
+        <h3 className="mt-2 font-headline text-3xl font-bold tracking-tight text-primary">
+          Historial de clases para {rangeLabel}
+        </h3>
+      </div>
+
       <div className="flex flex-col gap-4 border-b border-outline-variant/15 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">

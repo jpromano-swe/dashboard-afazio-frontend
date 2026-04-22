@@ -161,12 +161,20 @@ function sumBy<T>(items: T[], selector: (item: T) => number) {
 
 function shouldIncludeClassTitle(title: string | null | undefined) {
   const normalized = (title ?? "").trim().toLowerCase();
+  const excludedExactTitles = new Set([
+    "contenido cg",
+    "meloxican",
+    "pastilla rexy amox am",
+    "pastilla rexy amox pm",
+    "redes",
+    "vete rexy",
+  ]);
 
   if (!normalized) {
     return false;
   }
 
-  if (normalized === "contenido cg") {
+  if (excludedExactTitles.has(normalized)) {
     return false;
   }
 

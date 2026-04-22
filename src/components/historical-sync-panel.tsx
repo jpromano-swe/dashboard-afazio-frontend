@@ -136,7 +136,7 @@ export function HistoricalSyncPanel({
             <div className="flex items-end">
               <ActionButton
                 type="submit"
-                variant="secondary"
+                variant="outline"
                 className="h-[50px] w-full justify-center"
               >
                 Seleccionar rango
@@ -154,13 +154,13 @@ export function HistoricalSyncPanel({
                     ) : (
                       <CalendarSync className="h-3.5 w-3.5" />
                     )
-                  }
-                  onClick={() => setConfirmOpen(true)}
-                  disabled={isSyncing || isRefreshing}
-                  className="h-[50px] w-full justify-center"
-                >
-                  Sincronizar rango
-                </ActionButton>
+                }
+                onClick={() => setConfirmOpen(true)}
+                disabled={isSyncing || isRefreshing}
+                  className="h-[50px] w-full justify-center border-[#c28532]/35 bg-[#fde9cf] text-[#7a4a12] hover:bg-[#f7d8ae] hover:text-[#5f390d]"
+              >
+                Sincronizar rango
+              </ActionButton>
               </div>
             ) : null}
           </form>
