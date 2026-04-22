@@ -10,6 +10,13 @@ import {
   getConsultoras,
   isRealConsultora,
 } from "@/lib/backend";
+import {
+  endOfMonth,
+  formatShortDate,
+  startOfMonth,
+  toIsoDate,
+  toTimeZoneCalendarDate,
+} from "@/lib/date-time";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +38,7 @@ function resolveDateParam(value: string | undefined, fallback: string) {
 }
 
 function formatRangeDate(value: string) {
-  return new Intl.DateTimeFormat("es-AR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "America/Argentina/Buenos_Aires",
-  }).format(new Date(`${value}T12:00:00`));
+  return formatShortDate(value);
 }
 
 export default async function MigrationPage({
@@ -44,11 +46,9 @@ export default async function MigrationPage({
 }: {
   searchParams?: Promise<MigrationSearchParams>;
 }) {
-  const today = new Date();
-  const periodStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const periodEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const defaultFrom = `${periodStart.getFullYear()}-${String(periodStart.getMonth() + 1).padStart(2, "0")}-${String(periodStart.getDate()).padStart(2, "0")}`;
-  const defaultTo = `${periodEnd.getFullYear()}-${String(periodEnd.getMonth() + 1).padStart(2, "0")}-${String(periodEnd.getDate()).padStart(2, "0")}`;
+  const today = toTimeZoneCalendarDate();
+  const defaultFrom = toIsoDate(startOfMonth(today));
+  const defaultTo = toIsoDate(endOfMonth(today));
   const resolvedSearchParams = (await searchParams) ?? {};
   const fromParam = firstValue(resolvedSearchParams.from);
   const toParam = firstValue(resolvedSearchParams.to);

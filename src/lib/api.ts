@@ -31,114 +31,25 @@ import {
   type ReportsData,
   type WeeklyScheduleDay,
 } from "@/lib/data";
+import {
+  DEFAULT_LOCALE,
+  DEFAULT_TIME_ZONE,
+  endOfMonth,
+  formatDateRange,
+  formatDateTime,
+  formatMonthYear,
+  formatShortDate,
+  formatTime,
+  formatWeekdayLabel,
+  pad,
+  startOfMonth,
+  startOfWeek,
+  toIsoDate,
+  toTimeZoneCalendarDate,
+  toTimeZoneIsoDate,
+} from "@/lib/date-time";
 
-const DEFAULT_LOCALE = "es-AR";
 const DEFAULT_CURRENCY = "ARS";
-const DEFAULT_TIME_ZONE = "America/Argentina/Buenos_Aires";
-
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function toIsoDate(date: Date) {
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
-}
-
-function toTimeZoneCalendarDate(dateInput: string | Date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DEFAULT_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(dateInput));
-
-  const year = Number(parts.find((part) => part.type === "year")?.value);
-  const month = Number(parts.find((part) => part.type === "month")?.value);
-  const day = Number(parts.find((part) => part.type === "day")?.value);
-
-  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-}
-
-function startOfMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 12, 0, 0));
-}
-
-function endOfMonth(date: Date) {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12, 0, 0),
-  );
-}
-
-function startOfWeek(date: Date) {
-  const current = new Date(date);
-  const dayIndex = (current.getUTCDay() + 6) % 7;
-
-  current.setUTCDate(current.getUTCDate() - dayIndex);
-  current.setUTCHours(12, 0, 0, 0);
-
-  return current;
-}
-
-function formatShortDate(dateInput: string | Date) {
-  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    timeZone: DEFAULT_TIME_ZONE,
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  }).format(new Date(dateInput));
-}
-
-function formatMonthYear(dateInput: string | Date) {
-  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    timeZone: DEFAULT_TIME_ZONE,
-    month: "long",
-    year: "numeric",
-  }).format(new Date(dateInput));
-}
-
-function formatTime(dateInput: string | Date) {
-  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    timeZone: DEFAULT_TIME_ZONE,
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(dateInput));
-}
-
-function formatDateTime(dateInput: string | Date) {
-  return `${formatShortDate(dateInput)} · ${formatTime(dateInput)}`;
-}
-
-function formatDateRange(from: string | Date, to: string | Date) {
-  return `${formatShortDate(from)} - ${formatShortDate(to)}`;
-}
-
-function formatWeekdayLabel(dateInput: string | Date) {
-  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    timeZone: DEFAULT_TIME_ZONE,
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(dateInput));
-}
-
-function toTimeZoneIsoDate(dateInput: string | Date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DEFAULT_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(dateInput));
-
-  const year = parts.find((part) => part.type === "year")?.value;
-  const month = parts.find((part) => part.type === "month")?.value;
-  const day = parts.find((part) => part.type === "day")?.value;
-
-  if (!year || !month || !day) {
-    return toIsoDate(new Date(dateInput));
-  }
-
-  return `${year}-${month}-${day}`;
-}
 
 function formatCurrency(value: number, currency = DEFAULT_CURRENCY) {
   return new Intl.NumberFormat(DEFAULT_LOCALE, {
@@ -299,8 +210,8 @@ function buildInboxConflicts(
     const previousEnd = new Date(sorted[index - 1].fechaFin).getTime();
     const currentStart = new Date(sorted[index].fechaInicio).getTime();
     const sameDay =
-      new Date(sorted[index - 1].fechaInicio).toDateString() ===
-      new Date(sorted[index].fechaInicio).toDateString();
+      toTimeZoneIsoDate(sorted[index - 1].fechaInicio) ===
+      toTimeZoneIsoDate(sorted[index].fechaInicio);
 
     if (sameDay && currentStart < previousEnd) {
       overlaps += 1;

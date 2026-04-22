@@ -18,6 +18,7 @@ import {
   type CursoResponse,
 } from "@/lib/backend";
 import { notifyError, notifySuccess, notifyWarning } from "@/lib/client-toast";
+import { formatDateTime } from "@/lib/date-time";
 
 function getCourseLabel(course: CursoResponse) {
   return course.grupo ? `${course.empresa} - ${course.grupo}` : course.empresa;
@@ -265,13 +266,7 @@ export function MigrationClassRow({
   return (
     <tr className="hover:bg-surface-container-low/60">
       <td className="px-6 py-5 font-headline text-lg text-primary">
-        {new Intl.DateTimeFormat("es-AR", {
-          timeZone: "America/Argentina/Buenos_Aires",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(new Date(clase.fechaInicio))}
+        {formatDateTime(clase.fechaInicio)}
       </td>
       <td className="px-6 py-5">
         <p className="font-semibold text-primary">{clase.titulo}</p>

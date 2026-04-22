@@ -6,8 +6,16 @@ import {
   isPendingClassification,
   isRealConsultora,
 } from "@/lib/backend";
-
-const DEFAULT_TIME_ZONE = "America/Argentina/Buenos_Aires";
+import {
+  endOfMonth,
+  formatCapitalizedMonthYear,
+  formatShortDate,
+  formatTime,
+  pad,
+  startOfMonth,
+  toIsoDate,
+  toTimeZoneCalendarDate,
+} from "@/lib/date-time";
 
 type ReportTheme = "amber" | "purple";
 
@@ -52,64 +60,6 @@ export type ReportWorkspaceData = BillingPeriod & {
   emailSubject: string;
   emailBody: string;
 };
-
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function toIsoDate(date: Date) {
-  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
-}
-
-function toTimeZoneCalendarDate(dateInput: string | Date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: DEFAULT_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(dateInput));
-
-  const year = Number(parts.find((part) => part.type === "year")?.value);
-  const month = Number(parts.find((part) => part.type === "month")?.value);
-  const day = Number(parts.find((part) => part.type === "day")?.value);
-
-  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-}
-
-function startOfMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 12, 0, 0));
-}
-
-function endOfMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12, 0, 0));
-}
-
-function formatShortDate(dateInput: string | Date) {
-  return new Intl.DateTimeFormat("es-AR", {
-    timeZone: DEFAULT_TIME_ZONE,
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  }).format(new Date(dateInput));
-}
-
-function formatMonthYear(dateInput: string | Date) {
-  const formatted = new Intl.DateTimeFormat("es-AR", {
-    timeZone: DEFAULT_TIME_ZONE,
-    month: "long",
-    year: "numeric",
-  }).format(new Date(dateInput));
-
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-
-function formatTime(dateInput: string | Date) {
-  return new Intl.DateTimeFormat("es-AR", {
-    timeZone: DEFAULT_TIME_ZONE,
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(dateInput));
-}
 
 function formatLooseAmount(value: string | number, currency: string) {
   const numericValue = Number(value);
@@ -162,7 +112,7 @@ function buildPeriod(date = new Date()): BillingPeriod {
     key: `${periodDate.getUTCFullYear()}-${pad(periodDate.getUTCMonth() + 1)}`,
     from: toIsoDate(startOfMonth(periodDate)),
     to: toIsoDate(endOfMonth(periodDate)),
-    label: formatMonthYear(periodDate),
+    label: formatCapitalizedMonthYear(periodDate),
   };
 }
 

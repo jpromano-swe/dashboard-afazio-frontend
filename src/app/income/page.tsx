@@ -9,6 +9,12 @@ import {
 import { IncomeLedger } from "@/components/income-ledger";
 import { getIncomeData } from "@/lib/api";
 import { getConsultoras, isRealConsultora } from "@/lib/backend";
+import {
+  endOfMonth,
+  startOfMonth,
+  toIsoDate,
+  toTimeZoneCalendarDate,
+} from "@/lib/date-time";
 
 export const dynamic = "force-dynamic";
 
@@ -22,22 +28,6 @@ function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function toIsoDate(date: Date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function endOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0);
-}
-
 function isIsoDate(value: string | undefined) {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
 }
@@ -47,7 +37,7 @@ export default async function IncomePage({
 }: {
   searchParams?: Promise<IncomeSearchParams>;
 }) {
-  const today = new Date();
+  const today = toTimeZoneCalendarDate();
   const defaultFrom = toIsoDate(startOfMonth(today));
   const defaultTo = toIsoDate(endOfMonth(today));
   const resolvedSearchParams = (await searchParams) ?? {};
