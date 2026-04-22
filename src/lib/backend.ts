@@ -343,6 +343,10 @@ export function getGoogleCalendarAuthUrl() {
   return buildBackendUrl("/oauth2/authorization/google") ?? "/oauth2/authorization/google";
 }
 
+export function getGoogleDebugUrl() {
+  return buildBackendUrl("/google/debug") ?? "/google/debug";
+}
+
 export function getGoogleSyncRangeForMonth(date = new Date(), utcOffset = "-03:00") {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;

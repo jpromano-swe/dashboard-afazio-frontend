@@ -10,14 +10,14 @@ import {
   BadgeDollarSign,
   BarChart3,
   Bell,
-  CalendarSync,
   History,
   LayoutDashboard,
   Mail,
   Settings2,
   Wallet,
 } from "lucide-react";
-import { getGoogleCalendarAuthUrl } from "@/lib/backend";
+import { CalendarConnectionAction } from "@/components/calendar-connection-action";
+import { getGoogleCalendarAuthUrl, getGoogleDebugUrl } from "@/lib/backend";
 
 export type NavKey =
   | "dashboard"
@@ -227,19 +227,9 @@ export function DashboardShell({
 
 export function PageActions() {
   const connectHref = getGoogleCalendarAuthUrl();
+  const debugHref = getGoogleDebugUrl();
 
-  return (
-    <>
-      <ActionButton
-        href={connectHref}
-        variant="outline"
-        className="border-[#4f7f5f]/30 bg-surface-container-lowest text-[#3f6a4d] hover:bg-[#eef5ee] hover:text-[#31543d]"
-        icon={<CalendarSync className="h-3.5 w-3.5" />}
-      >
-        Conectar calendario
-      </ActionButton>
-    </>
-  );
+  return <CalendarConnectionAction authUrl={connectHref} debugUrl={debugHref} />;
 }
 
 export function ActionButton({
