@@ -450,8 +450,15 @@ export async function actualizarCurso(id: number, payload: ActualizarCursoComman
   });
 }
 
-export async function getClasesHoy(fecha: string) {
+export async function getClasesHoy(
+  fecha: string,
+  options?: { soloClasificadas?: boolean },
+) {
   const params = new URLSearchParams({ fecha });
+
+  if (options?.soloClasificadas) {
+    params.set("soloClasificadas", "true");
+  }
 
   return apiFetch<ClaseDelDiaResponse[]>(`/api/clases/hoy?${params.toString()}`);
 }

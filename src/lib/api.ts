@@ -2,7 +2,6 @@ import {
   type ApiErrorResponse,
   BackendConfigError,
   getClasesHoy,
-  getClasesPorPeriodo,
   getClasesSemana,
   getClasesPendientesClasificacion,
   getConsultoras,
@@ -186,10 +185,6 @@ function normalizeConsultoraName(name: string | null | undefined) {
   return name?.trim() || "Sin clasificar";
 }
 
-function normalizeTitleKey(title: string | null | undefined) {
-  return (title ?? "").trim().toLowerCase();
-}
-
 function buildAssignmentLabel(
   clase: Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo" | "sinClasificar">,
 ) {
@@ -208,64 +203,8 @@ function buildAssignmentLabel(
   return normalizeConsultoraName(clase.consultoraNombre);
 }
 
-function buildClassAssignmentLookup(classes: ClaseDelDiaResponse[]) {
-  const lookup = new Map<
-    string,
-    Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">
-  >();
-
-  classes.forEach((clase) => {
-    const key = normalizeTitleKey(clase.titulo);
-    const hasAssignment =
-      !isPendingClassification(clase.sinClasificar, clase.consultoraNombre) ||
-      Boolean(clase.empresa) ||
-      Boolean(clase.grupo);
-
-    if (!key || !hasAssignment || lookup.has(key)) {
-      return;
-    }
-
-    lookup.set(key, {
-      consultoraNombre: clase.consultoraNombre,
-      empresa: clase.empresa ?? null,
-      grupo: clase.grupo ?? null,
-    });
-  });
-
-  return lookup;
-}
-
-function applyAssignmentFallback(
-  classes: ClaseDelDiaResponse[],
-  assignmentLookup: Map<
-    string,
-    Pick<ClaseDelDiaResponse, "consultoraNombre" | "empresa" | "grupo">
-  >,
-) {
-  return classes.map((clase) => {
-    const alreadyAssigned =
-      !isPendingClassification(clase.sinClasificar, clase.consultoraNombre) ||
-      Boolean(clase.empresa) ||
-      Boolean(clase.grupo);
-
-    if (alreadyAssigned) {
-      return clase;
-    }
-
-    const fallbackAssignment = assignmentLookup.get(normalizeTitleKey(clase.titulo));
-
-    if (!fallbackAssignment) {
-      return clase;
-    }
-
-    return {
-      ...clase,
-      consultoraNombre: fallbackAssignment.consultoraNombre,
-      sinClasificar: false,
-      empresa: fallbackAssignment.empresa ?? null,
-      grupo: fallbackAssignment.grupo ?? null,
-    };
-  });
+function isClassifiedForDashboard(clase: ClaseDelDiaResponse) {
+  return !isPendingClassification(clase.sinClasificar, clase.consultoraNombre);
 }
 
 function getScheduleStatus(clase: ClaseDelDiaResponse) {
@@ -480,23 +419,22 @@ export async function getDashboardData(date = new Date()): Promise<DashboardData
       rawTodayClasses,
       rawWeeklyClasses,
       rawPendingClasses,
-      classifiedMonthClasses,
       incomeResult,
     ] = await Promise.all([
-      getClasesHoy(todayIso),
-      getClasesSemana(weekStart),
+      getClasesHoy(todayIso, { soloClasificadas: true }),
+      getClasesSemana(weekStart, { soloClasificadas: true }),
       getClasesPendientesClasificacion(),
-      getClasesPorPeriodo(monthStart, monthEnd, { soloClasificadas: true }).catch(() => []),
       getIngresosPeriodo(monthStart, monthEnd)
         .then((value) => ({ value, error: null }))
         .catch((error) => ({ value: null, error })),
     ]);
-    const assignmentLookup = buildClassAssignmentLookup(classifiedMonthClasses);
-    const todayClasses = applyAssignmentFallback(rawTodayClasses, assignmentLookup).filter((clase) =>
-      shouldIncludeClassTitle(clase.titulo),
+    const todayClasses = rawTodayClasses.filter(
+      (clase) =>
+        shouldIncludeClassTitle(clase.titulo) && isClassifiedForDashboard(clase),
     );
-    const weeklyClasses = applyAssignmentFallback(rawWeeklyClasses, assignmentLookup).filter(
-      (clase) => shouldIncludeClassTitle(clase.titulo),
+    const weeklyClasses = rawWeeklyClasses.filter(
+      (clase) =>
+        shouldIncludeClassTitle(clase.titulo) && isClassifiedForDashboard(clase),
     );
     const pendingClasses = rawPendingClasses.filter((session) =>
       shouldIncludeClassTitle(session.titulo),
