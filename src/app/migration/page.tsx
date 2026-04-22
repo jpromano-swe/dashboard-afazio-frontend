@@ -52,6 +52,7 @@ export default async function MigrationPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const fromParam = firstValue(resolvedSearchParams.from);
   const toParam = firstValue(resolvedSearchParams.to);
+  const rangeSelected = isIsoDate(fromParam) && isIsoDate(toParam);
   const from = resolveDateParam(fromParam, defaultFrom);
   const to = resolveDateParam(toParam, defaultTo);
   const [migrationClasses, consultoras] = await Promise.all([
@@ -96,6 +97,8 @@ export default async function MigrationPage({
           to={to}
           rangeLabel={`${from} a ${to}`}
           syncUrl={syncUrl}
+          classCount={migrationClasses.length}
+          rangeSelected={rangeSelected}
         />
       </div>
 
