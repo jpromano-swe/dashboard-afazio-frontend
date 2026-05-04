@@ -6,6 +6,7 @@ import {
   actualizarClasificacionClaseMismoTitulo,
   actualizarEstadoClase,
   actualizarCurso,
+  actualizarTarifa,
   crearConsultora,
   crearCurso,
   crearTarifa,
@@ -303,6 +304,35 @@ export async function createRateAction(
     return {
       status: "success",
       message: "Tarifa creada correctamente.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: getActionErrorMessage(error),
+    };
+  }
+}
+
+export async function updateRateAction(
+  _previousState: MutationActionState,
+  formData: FormData,
+): Promise<MutationActionState> {
+  try {
+    await actualizarTarifa(getRequiredNumber(formData, "tarifaId"), {
+      consultoraId: getRequiredNumber(formData, "consultoraId"),
+      montoPorHora: getRequiredNumber(formData, "montoPorHora"),
+      moneda: "ARS",
+      vigenteDesde: getString(formData, "vigenteDesde"),
+      vigenteHasta: getNullableString(formData, "vigenteHasta"),
+      fechaUltimoAumento: getNullableString(formData, "fechaUltimoAumento"),
+      observaciones: getNullableString(formData, "observaciones"),
+    });
+
+    revalidateOperationalViews();
+
+    return {
+      status: "success",
+      message: "Tarifa actualizada correctamente.",
     };
   } catch (error) {
     return {

@@ -185,6 +185,16 @@ export interface CrearTarifaConsultoraCommand {
   observaciones: string | null;
 }
 
+export interface ActualizarTarifaConsultoraCommand {
+  consultoraId: number;
+  montoPorHora: number;
+  moneda: string;
+  vigenteDesde: string;
+  vigenteHasta: string | null;
+  fechaUltimoAumento: string | null;
+  observaciones: string | null;
+}
+
 export interface TarifaConsultoraResponse {
   id: number;
   consultoraId: number;
@@ -552,6 +562,16 @@ export async function marcarAsistencia(payload: MarcarAsistenciaCommand) {
 export async function crearTarifa(payload: CrearTarifaConsultoraCommand) {
   return apiFetch<TarifaConsultoraResponse>("/api/tarifas", {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function actualizarTarifa(
+  tarifaId: number,
+  payload: ActualizarTarifaConsultoraCommand,
+) {
+  return apiFetch<TarifaConsultoraResponse>(`/api/tarifas/${tarifaId}`, {
+    method: "PUT",
     body: JSON.stringify(payload),
   });
 }

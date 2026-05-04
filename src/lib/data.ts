@@ -88,8 +88,16 @@ export type RateCard = {
   subtitle: string;
   status: "Activa" | "Revisión pendiente";
   tone: "secondary" | "amber" | "neutral";
+  consultoraId: number;
+  currentRateId: number;
   currentRate: string;
+  currentRateValue: number;
+  currency: string;
   effectiveSince: string;
+  effectiveSinceIso: string;
+  effectiveUntilIso: string | null;
+  lastIncreaseIso: string | null;
+  notes: string | null;
   history: Array<{ value: string; note: string; range: string }>;
 };
 
@@ -290,8 +298,16 @@ export const ratesData: RatesData = {
       subtitle: "Socio académico premium",
       status: "Activa",
       tone: "secondary",
+      consultoraId: 1,
+      currentRateId: 101,
       currentRate: "$185.00",
+      currentRateValue: 185,
+      currency: "USD",
       effectiveSince: "12 ene 2024",
+      effectiveSinceIso: "2024-01-12",
+      effectiveUntilIso: null,
+      lastIncreaseIso: "2024-01-12",
+      notes: "Estándar",
       history: [
         { value: "$170.00", note: "Estándar", range: "Mar 2023 — Ene 2024" },
         { value: "$155.00", note: "Alta inicial", range: "Ago 2022 — Mar 2023" },
@@ -302,8 +318,16 @@ export const ratesData: RatesData = {
       subtitle: "Firma de análisis literario",
       status: "Activa",
       tone: "amber",
+      consultoraId: 2,
+      currentRateId: 102,
       currentRate: "$210.00",
+      currentRateValue: 210,
+      currency: "USD",
       effectiveSince: "05 nov 2023",
+      effectiveSinceIso: "2023-11-05",
+      effectiveUntilIso: null,
+      lastIncreaseIso: "2023-11-05",
+      notes: "Estándar",
       history: [
         { value: "$195.00", note: "Estándar", range: "Ene 2023 — Nov 2023" },
         {
@@ -318,8 +342,16 @@ export const ratesData: RatesData = {
       subtitle: "División de servicios lingüísticos",
       status: "Revisión pendiente",
       tone: "neutral",
+      consultoraId: 3,
+      currentRateId: 103,
       currentRate: "$145.00",
+      currentRateValue: 145,
+      currency: "USD",
       effectiveSince: "14 feb 2023",
+      effectiveSinceIso: "2023-02-14",
+      effectiveUntilIso: null,
+      lastIncreaseIso: "2023-02-14",
+      notes: "Histórica",
       history: [{ value: "$130.00", note: "Histórica", range: "Ago 2021 — Feb 2023" }],
     },
   ],

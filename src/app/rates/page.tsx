@@ -5,6 +5,7 @@ import {
   SectionFrame,
   StatusBadge,
 } from "@/components/editorial";
+import { RateEditModal } from "@/components/rate-edit-modal";
 import { RateCreateModal } from "@/components/rate-create-modal";
 import { getConsultoras, isRealConsultora } from "@/lib/backend";
 import { getRatesData } from "@/lib/api";
@@ -17,6 +18,12 @@ export default async function RatesPage() {
     getConsultoras().catch(() => []),
   ]);
   const activeConsultoras = consultoras.filter(isRealConsultora);
+  const currentRates = data.cards.map((card) => ({
+    consultoraId: card.consultoraId,
+    consultoraNombre: card.name,
+    vigenteDesde: card.effectiveSinceIso,
+    vigenteHasta: card.effectiveUntilIso,
+  }));
 
   return (
     <DashboardShell
@@ -39,7 +46,10 @@ export default async function RatesPage() {
             </p>
           ) : null}
         </div>
-        <RateCreateModal activeConsultoras={activeConsultoras} />
+        <RateCreateModal
+          activeConsultoras={activeConsultoras}
+          currentRates={currentRates}
+        />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
@@ -145,6 +155,22 @@ export default async function RatesPage() {
                   </details>
                 ) : null}
               </div>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <RateEditModal
+                activeConsultoras={activeConsultoras}
+                rate={{
+                  tarifaId: card.currentRateId,
+                  consultoraId: card.consultoraId,
+                  consultoraNombre: card.name,
+                  montoPorHora: card.currentRateValue,
+                  vigenteDesde: card.effectiveSinceIso,
+                  vigenteHasta: card.effectiveUntilIso,
+                  fechaUltimoAumento: card.lastIncreaseIso,
+                  observaciones: card.notes,
+                }}
+              />
             </div>
           </SectionFrame>
         ))}

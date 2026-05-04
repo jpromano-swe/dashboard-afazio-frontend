@@ -1,25 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { ActionButton } from "@/components/editorial";
 import { RateCreateForm } from "@/components/rate-create-form";
 import type { ConsultoraResponse } from "@/lib/backend";
 
-type RateCreateModalProps = {
+type RateEditModalProps = {
   activeConsultoras: ConsultoraResponse[];
-  currentRates: Array<{
+  rate: {
+    tarifaId: number;
     consultoraId: number;
     consultoraNombre: string;
+    montoPorHora: number;
     vigenteDesde: string;
     vigenteHasta: string | null;
-  }>;
+    fechaUltimoAumento: string | null;
+    observaciones: string | null;
+  };
 };
 
-export function RateCreateModal({
-  activeConsultoras,
-  currentRates,
-}: RateCreateModalProps) {
+export function RateEditModal({ activeConsultoras, rate }: RateEditModalProps) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -45,11 +46,12 @@ export function RateCreateModal({
   return (
     <>
       <ActionButton
-        variant="primary"
-        icon={<Plus className="h-4 w-4" />}
+        variant="outline"
+        icon={<Pencil className="h-4 w-4" />}
         onClick={handleOpen}
+        className="justify-center"
       >
-        Nueva tarifa
+        Editar tarifa actual
       </ActionButton>
 
       {mounted ? (
@@ -70,20 +72,21 @@ export function RateCreateModal({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant/70">
-                  Tarifa
+                  Tarifa actual
                 </p>
                 <h3 className="mt-2 font-headline text-3xl font-bold text-primary">
-                  Nueva tarifa
+                  Editar tarifa
                 </h3>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-on-surface-variant">
-                  Elegí la consultora, definí la vigencia y guardá la nueva tarifa en ARS.
+                  Ajustá el monto o la vigencia si hubo un error de carga. Los cambios se guardan
+                  en ARS para {rate.consultoraNombre}.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant transition hover:bg-surface-container-high hover:text-primary"
-                aria-label="Cerrar modal de tarifa"
+                aria-label="Cerrar modal de edición de tarifa"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -91,7 +94,8 @@ export function RateCreateModal({
 
             <RateCreateForm
               activeConsultoras={activeConsultoras}
-              currentRates={currentRates}
+              mode="edit"
+              editingRate={rate}
               onSuccess={handleClose}
             />
           </div>
