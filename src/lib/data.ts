@@ -88,8 +88,16 @@ export type RateCard = {
   subtitle: string;
   status: "Activa" | "Revisión pendiente";
   tone: "secondary" | "amber" | "neutral";
+  consultoraId: number;
+  currentRateId: number;
   currentRate: string;
+  currentRateValue: number;
+  currency: string;
   effectiveSince: string;
+  effectiveSinceIso: string;
+  effectiveUntilIso: string | null;
+  lastIncreaseIso: string | null;
+  notes: string | null;
   history: Array<{ value: string; note: string; range: string }>;
 };
 

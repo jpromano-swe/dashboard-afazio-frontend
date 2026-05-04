@@ -547,8 +547,16 @@ export async function getRatesData(date = new Date()): Promise<RatesData> {
               ? ("Activa" as const)
               : ("Revisión pendiente" as const),
           tone: getRateTone(index),
+          consultoraId: seed.id,
+          currentRateId: activeRate.id,
           currentRate: formatCurrency(activeRate.montoPorHora, activeRate.moneda),
+          currentRateValue: activeRate.montoPorHora,
+          currency: activeRate.moneda,
           effectiveSince: formatShortDate(activeRate.vigenteDesde),
+          effectiveSinceIso: activeRate.vigenteDesde,
+          effectiveUntilIso: activeRate.vigenteHasta,
+          lastIncreaseIso: activeRate.fechaUltimoAumento,
+          notes: activeRate.observaciones,
           history: sortedHistory.map((rate, historyIndex) => ({
             value: formatCurrency(rate.montoPorHora, rate.moneda),
             note:
