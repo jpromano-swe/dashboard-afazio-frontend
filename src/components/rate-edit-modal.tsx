@@ -49,7 +49,7 @@ export function RateEditModal({ activeConsultoras, rate }: RateEditModalProps) {
         variant="outline"
         icon={<Pencil className="h-4 w-4" />}
         onClick={handleOpen}
-        className="justify-center"
+        className="justify-center transition duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02] hover:border-primary/40 hover:bg-surface-container-high hover:text-primary"
       >
         Editar tarifa actual
       </ActionButton>
